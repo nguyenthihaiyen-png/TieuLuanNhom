@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trà Sữa Mây Xanh — Hệ thống Quản lý Bán hàng & Kho (ASP.NET Core MVC)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            matcha: {
+              50: '#f1f8f4',
+              100: '#dceee3',
+              200: '#bce0cb',
+              500: '#2e8b57',
+              600: '#217045',
+              700: '#1a5837',
+              800: '#16462d',
+              900: '#133a27',
+            },
+            milk: '#faf8f5',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+      background-color: #f3f6f4;
+      color: #1e293b;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    @media print {
+      body * { visibility: hidden !important; }
+      #printInvoiceArea, #printInvoiceArea * { visibility: visible !important; }
+      #printInvoiceArea {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 16px !important;
+        background: #fff !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col overflow-x-hidden">
+
+  <!-- TOP HEADER -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand -->
+      <div class="flex items-center gap-3">
+        <button id="btnMobileMenu" class="lg:hidden p-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50" aria-label="Menu">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-matcha-500 to-matcha-700 flex items-center justify-center text-white shadow-sm">
+          <!-- Cup SVG Logo -->
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 7h12l-1.2 13.2a1.5 1.5 0 0 1-1.5 1.3H8.7a1.5 1.5 0 0 1-1.5-1.3L6 7Z"/>
+            <path d="M4.5 7h15M9 7V5a3 3 0 0 1 6 0v2M14 2l-2 9"/>
+            <circle cx="10" cy="16" r="1" fill="currentColor"/><circle cx="14" cy="17" r="1" fill="currentColor"/><circle cx="12" cy="14" r="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-base sm:text-lg text-matcha-800 tracking-tight">Trà Sữa Mây Xanh</span>
+            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-matcha-100 text-matcha-700">MayXanhDB · Live</span>
+          </div>
+          <p class="text-xs text-slate-500">Quản lý Bán hàng, Đơn hàng &amp; Kho nguyên liệu</p>
+        </div>
+      </div>
+
+      <!-- Branch & Role Switcher -->
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <!-- Branch Selector -->
+        <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+          <svg class="w-4 h-4 text-matcha-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <select id="branchSelect" class="bg-transparent text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none cursor-pointer">
+            <option value="CN_BH">CN Biên Hòa - Võ Thị Sáu</option>
+            <option value="CN_TB">CN Trảng Bom</option>
+            <option value="CN_LK">CN Long Khánh</option>
+          </select>
+        </div>
+
+        <!-- Role Switcher (QĐ12 RBAC Test) -->
+        <div class="flex items-center gap-2 bg-matcha-50 border border-matcha-200 rounded-xl px-2.5 py-1.5">
+          <span class="w-2 h-2 rounded-full bg-matcha-500 animate-pulse"></span>
+          <label for="roleSelect" class="text-xs font-medium text-matcha-700 hidden md:inline">Vai trò:</label>
+          <select id="roleSelect" class="bg-transparent text-xs sm:text-sm font-bold text-matcha-800 focus:outline-none cursor-pointer">
+            <option value="manager">Phạm Hoàng Nam (Quản lý hệ thống)</option>
+            <option value="cashier">Lê Minh Anh (Thu ngân)</option>
+            <option value="warehouse">Trần Quốc Bảo (Thủ kho)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <div class="flex-1 flex relative">
+    <!-- LEFT SIDEBAR -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-20 w-60 bg-white border-r border-slate-200 flex flex-col justify-between transform -translate-x-full lg:translate-x-0 transition-transform duration-200 pt-16 lg:pt-0">
+      <div class="p-3 space-y-1.5">
+        <div class="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">Phân hệ nghiệp vụ</div>
+
+        <button data-nav="bm01" class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition">
+          <span class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg flex items-center justify-center bg-matcha-100 text-matcha-700">🧋</span>
+            <span>Bán hàng</span>
+          </span>
+          <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">BM01</span>
+        </button>
+
+        <button data-nav="bm02" class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition">
+          <span class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-50 text-blue-600">📥</span>
+            <span>Nhập kho</span>
+          </span>
+          <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">BM02</span>
+        </button>
+
+        <button data-nav="bm03" class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition">
+          <span class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg flex items-center justify-center bg-amber-50 text-amber-600">📤</span>
+            <span>Xuất kho</span>
+          </span>
+          <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">BM03</span>
+        </button>
+
+        <button data-nav="bm04" class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition">
+          <span class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg flex items-center justify-center bg-purple-50 text-purple-600">🧾</span>
+            <span>Hóa đơn</span>
+          </span>
+          <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">BM04</span>
+        </button>
+
+        <button data-nav="bm05" class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition">
+          <span class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg flex items-center justify-center bg-emerald-50 text-emerald-600">📊</span>
+            <span>Báo cáo</span>
+          </span>
+          <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">BM05</span>
+        </button>
+      </div>
+
+      <!-- Role Permission Info Card -->
+      <div class="p-3 m-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+        <div class="font-bold text-slate-700 flex items-center gap-1.5">
+          <span>🛡️ Phân quyền QĐ12</span>
+        </div>
+        <p id="roleDescText" class="text-slate-500 leading-relaxed">
+          Quản lý toàn quyền truy cập 5 phân hệ nghiệp vụ và báo cáo doanh thu.
+        </p>
+      </div>
+    </aside>
+
+    <!-- CONTENT AREA -->
+    <main class="flex-1 p-3 sm:p-5 overflow-x-hidden">
+
+      <!-- ========================================================= -->
+      <!-- SCREEN BM01: TẠO VÀ QUẢN LÝ ĐƠN HÀNG (POS)               -->
+      <!-- ========================================================= -->
+      <section id="screen-bm01" class="screen-panel space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h1 class="text-lg sm:text-xl font-extrabold text-slate-800">Tạo và quản lý đơn hàng (BM01)</h1>
+            <p class="text-xs text-slate-500">Tiếp nhận đơn tại quầy / giao hàng · Tự động tính ship QĐ06, điểm QĐ08 &amp; trừ kho FEFO QĐ05</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 font-mono font-semibold text-matcha-700" id="posOrderCodeBadge">DH-20261112-0043</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+          <!-- LEFT: PRODUCT MENU GRID (7 cols) -->
+          <div class="xl:col-span-7 bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-4">
+            <!-- Search & Category Filter -->
+            <div class="flex flex-col sm:flex-row gap-2.5">
+              <div class="relative flex-1">
+                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input id="posSearchInput" type="text" placeholder="Tìm tên trà sữa, trà trái cây..." class="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-matcha-500" />
+              </div>
+              <div id="posCategoryTabs" class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                <button data-cat="all" class="cat-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-matcha-600 text-white whitespace-nowrap">Tất cả</button>
+                <button data-cat="trasua" class="cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap">Trà sữa</button>
+                <button data-cat="traicay" class="cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap">Trà trái cây</button>
+                <button data-cat="kemcheese" class="cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap">Kem cheese</button>
+                <button data-cat="daxay" class="cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap">Đá xay</button>
+              </div>
+            </div>
+
+            <!-- Product Cards Grid -->
+            <div id="posProductGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+          </div>
+
+          <!-- RIGHT: CART & ORDER DETAILS (5 cols) -->
+          <div class="xl:col-span-5 bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3.5">
+            <!-- Order Channel & Type -->
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Kênh đặt hàng</label>
+                <select id="posChannel" class="w-full text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 focus:outline-none focus:border-matcha-500">
+                  <option value="Tại quầy">Tại quầy</option>
+                  <option value="Điện thoại">Điện thoại</option>
+                  <option value="Ứng dụng">Ứng dụng</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Loại đơn hàng</label>
+                <select id="posOrderType" class="w-full text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 focus:outline-none focus:border-matcha-500">
+                  <option value="counter">Đơn tại quầy</option>
+                  <option value="delivery">Đơn giao hàng</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Customer Lookup -->
+            <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-200/80 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-slate-600">Khách hàng &amp; Tích điểm</span>
+                <span id="customerPointsBadge" class="text-[11px] font-semibold text-matcha-700">Khách lẻ (0 điểm)</span>
+              </div>
+              <div class="flex gap-2">
+                <input id="posCustomerPhone" type="text" placeholder="Nhập SĐT (VD: 0901234567)" class="flex-1 text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-matcha-500" />
+                <button id="btnFindCustomer" type="button" class="px-3 py-1.5 rounded-lg bg-matcha-600 text-white text-xs font-semibold hover:bg-matcha-700">Tìm</button>
+              </div>
+            </div>
+
+            <!-- Delivery Fields (Hidden when counter order) -->
+            <div id="deliveryFieldsBox" class="hidden bg-amber-50/70 rounded-xl p-2.5 border border-amber-200 space-y-2">
+              <div class="text-[11px] font-bold text-amber-800 flex items-center justify-between">
+                <span>🚚 Thông tin giao hàng (QĐ06)</span>
+                <span id="shipRuleHint" class="font-normal text-[10px]">Free ≤ 3km hoặc đơn ≥ 150k</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <input id="delivReceiver" type="text" placeholder="Tên người nhận *" class="text-xs bg-white border border-amber-200 rounded-lg px-2.5 py-1.5 focus:outline-none" />
+                <div class="relative">
+                  <input id="delivDistance" type="number" min="0" step="0.1" value="2.4" placeholder="Km" class="w-full text-xs bg-white border border-amber-200 rounded-lg pl-2.5 pr-8 py-1.5 focus:outline-none" />
+                  <span class="text-[10px] text-slate-400 font-semibold absolute right-2.5 top-1/2 -translate-y-1/2">km</span>
+                </div>
+              </div>
+              <input id="delivAddress" type="text" placeholder="Địa chỉ giao hàng chi tiết *" class="w-full text-xs bg-white border border-amber-200 rounded-lg px-2.5 py-1.5 focus:outline-none" />
+            </div>
+
+            <!-- Cart Items List -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-bold text-slate-700">Chi tiết món đã chọn (<span id="cartCountLabel">0</span>)</span>
+                <button id="btnClearCart" type="button" class="text-[11px] font-semibold text-rose-600 hover:underline">Xóa tất cả</button>
+              </div>
+              <div id="posCartList" class="max-h-52 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-xl bg-milk/50 px-2.5">
+                <div class="py-6 text-center text-xs text-slate-400">Chưa có sản phẩm nào trong đơn</div>
+              </div>
+            </div>
+
+            <!-- Coupon & Loyalty Points -->
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Mã giảm giá (1 mã/đơn)</label>
+                <div class="flex gap-1">
+                  <input id="posCouponInput" type="text" placeholder="MAYXANH10" class="w-full text-xs uppercase font-mono bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none" />
+                  <button id="btnApplyCoupon" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-white text-xs font-semibold hover:bg-slate-700">Áp</button>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Dùng điểm (1đ = 100đ, ≤50%)</label>
+                <input id="posPointsUse" type="number" min="0" step="10" value="0" class="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none" />
+              </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="space-y-1.5">
+              <label class="block text-[11px] font-semibold text-slate-500">Phương thức thanh toán</label>
+              <div class="grid grid-cols-3 gap-1.5">
+                <button type="button" data-pay="Tiền mặt" class="pay-method-btn py-1.5 px-2 rounded-xl text-xs font-bold border-2 border-matcha-600 bg-matcha-50 text-matcha-800">💵 Tiền mặt</button>
+                <button type="button" data-pay="Chuyển khoản" class="pay-method-btn py-1.5 px-2 rounded-xl text-xs font-semibold border border-slate-200 bg-white text-slate-600">🏦 Chuyển khoản</button>
+                <button type="button" data-pay="COD" class="pay-method-btn py-1.5 px-2 rounded-xl text-xs font-semibold border border-slate-200 bg-white text-slate-600">📦 COD</button>
+              </div>
+              <!-- Transfer confirmation toggle -->
+              <label id="transferConfirmWrap" class="hidden flex items-center gap-2 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-2.5 py-1.5 cursor-pointer mt-1.5">
+                <input id="chkTransferReceived" type="checkbox" class="rounded text-matcha-600" />
+                <span class="font-semibold">Xác nhận đã nhận tiền chuyển khoản (đủ ĐK pha chế)</span>
+              </label>
+            </div>
+
+            <!-- Summary Totals -->
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 space-y-1 text-xs">
+              <div class="flex justify-between text-slate-600">
+                <span>Tổng tiền hàng:</span>
+                <span id="sumSubtotal" class="font-semibold">0 đ</span>
+              </div>
+              <div class="flex justify-between text-emerald-700">
+                <span>Giảm giá coupon (<span id="appliedCouponName">Không</span>):</span>
+                <span id="sumCouponDiscount">-0 đ</span>
+              </div>
+              <div class="flex justify-between text-purple-700">
+                <span>Quy đổi điểm tích lũy:</span>
+                <span id="sumPointDiscount">-0 đ</span>
+              </div>
+              <div class="flex justify-between text-slate-600">
+                <span>Phí giao hàng (QĐ06):</span>
+                <span id="sumShippingFee" class="font-semibold">0 đ</span>
+              </div>
+              <div class="border-t border-slate-200 pt-1.5 mt-1.5 flex justify-between items-center text-sm font-extrabold text-matcha-800">
+                <span>TỔNG THANH TOÁN:</span>
+                <span id="sumGrandTotal" class="text-base">0 đ</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-3 gap-2 pt-1">
+              <button id="btnCancelOrderDraft" type="button" class="py-2.5 px-3 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50">Hủy đơn</button>
+              <button id="btnSaveAndBrew" type="button" class="col-span-2 py-2.5 px-4 rounded-xl bg-matcha-600 text-white text-xs sm:text-sm font-bold hover:bg-matcha-700 shadow-sm flex items-center justify-center gap-1.5">
+                <span>Lưu &amp; Pha chế (Trừ kho FEFO)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- SCREEN BM02: LẬP PHIẾU NHẬP KHO                           -->
+      <!-- ========================================================= -->
+      <section id="screen-bm02" class="screen-panel hidden space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h1 class="text-lg sm:text-xl font-extrabold text-slate-800">Lập phiếu nhập kho nguyên liệu (BM02)</h1>
+            <p class="text-xs text-slate-500">Ghi nhận lô nguyên liệu mới (LoNguyenLieu) và đồng bộ tồn kho chi nhánh (TonKhoChiNhanh)</p>
+          </div>
+          <span class="px-3 py-1 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 text-xs font-mono font-bold" id="inReceiptCode">PN-20261112-010</span>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs space-y-4">
+          <!-- Header Info -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Chi nhánh nhập kho</label>
+              <input id="inBranchDisplay" type="text" readonly class="w-full text-xs font-bold bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-slate-700" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Ngày nhập</label>
+              <input id="inDate" type="date" value="2026-11-12" class="w-full text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Nhà cung cấp *</label>
+              <select id="inSupplier" class="w-full text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
+                <option value="Công ty Trà & Nguyên Liệu Lộc Phát">Công ty Trà &amp; Nguyên Liệu Lộc Phát</option>
+                <option value="Công ty Sữa & Topping Đại Phát">Công ty Sữa &amp; Topping Đại Phát</option>
+                <option value="Nông sản Trái cây Đà Lạt Xanh">Nông sản Trái cây Đà Lạt Xanh</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 mb-1">Nhân viên lập phiếu</label>
+              <input id="inStaffDisplay" type="text" readonly class="w-full text-xs font-bold bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-slate-700" />
+            </div>
+          </div>
+
+          <!-- Line Items Table -->
+          <div class="overflow-x-auto border border-slate-200 rounded-xl">
+            <table class="w-full min-w-[740px] text-xs text-left">
+              <thead class="bg-matcha-50 text-matcha-900 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="py-2.5 px-3">Nguyên liệu</th>
+                  <th class="py-2.5 px-2 w-20">ĐVT</th>
+                  <th class="py-2.5 px-2 w-24">Số lượng</th>
+                  <th class="py-2.5 px-2 w-32">Đơn giá (đ)</th>
+                  <th class="py-2.5 px-2 w-32">Số lô *</th>
+                  <th class="py-2.5 px-2 w-36">Hạn sử dụng *</th>
+                  <th class="py-2.5 px-3 text-right w-32">Thành tiền</th>
+                  <th class="py-2.5 px-2 w-10"></th>
+                </tr>
+              </thead>
+              <tbody id="inRowsBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <button id="btnAddInRow" type="button" class="px-3 py-2 rounded-xl bg-matcha-50 text-matcha-700 border border-matcha-200 text-xs font-bold hover:bg-matcha-100">
+              + Thêm dòng nguyên liệu
+            </button>
+            <div class="text-right">
+              <span class="text-xs text-slate-500 mr-2">Tổng giá trị phiếu nhập:</span>
+              <span id="inTotalAmount" class="text-base font-extrabold text-matcha-700">0 đ</span>
+            </div>
+          </div>
+
+          <div class="border-t border-slate-100 pt-3 flex flex-wrap items-center justify-between gap-3">
+            <p class="text-xs text-amber-700 italic">Lưu ý: Chỉ cập nhật bảng LoNguyenLieu và TonKhoChiNhanh sau khi bấm Xác nhận nhập kho.</p>
+            <button id="btnConfirmStockIn" type="button" class="px-5 py-2.5 rounded-xl bg-matcha-600 text-white text-xs sm:text-sm font-bold hover:bg-matcha-700 shadow-sm">
+              ✓ Xác nhận nhập kho
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- SCREEN BM03: LẬP PHIẾU XUẤT KHO & TỒN KHO FEFO            -->
+      <!-- ========================================================= -->
+      <section id="screen-bm03" class="screen-panel hidden space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h1 class="text-lg sm:text-xl font-extrabold text-slate-800">Lập phiếu xuất kho thủ công / xuất hủy (BM03)</h1>
+            <p class="text-xs text-slate-500">Xuất hủy nguyên liệu hết hạn, hư hỏng &amp; theo dõi danh sách lô nguyên liệu theo nguyên tắc FEFO</p>
+          </div>
+          <span class="px-3 py-1 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-mono font-bold" id="outReceiptCode">PX-20261112-005</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <!-- Left: Manual Stock Out Form (7 cols) -->
+          <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3.5">
+            <h2 class="text-sm font-bold text-slate-800">Tạo phiếu xuất kho mới</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">Lý do xuất kho *</label>
+                <select id="outReason" class="w-full text-xs font-bold text-rose-700 bg-rose-50/60 border border-rose-200 rounded-xl px-3 py-2">
+                  <option value="Xuất hủy nguyên liệu hết hạn">Xuất hủy nguyên liệu hết hạn</option>
+                  <option value="Nguyên liệu hư hỏng / ẩm mốc">Nguyên liệu hư hỏng / ẩm mốc</option>
+                  <option value="Xuất điều chuyển nội bộ">Xuất điều chuyển nội bộ</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 mb-1">Ghi chú kiểm tra *</label>
+                <input id="outNote" type="text" value="Kiểm kê định kỳ cuối ca, niêm phong hủy" class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2" />
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2.5">
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end">
+                <div class="sm:col-span-7">
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">Chọn Lô nguyên liệu tại chi nhánh</label>
+                  <select id="outLotSelect" class="w-full text-xs font-semibold bg-white border border-slate-200 rounded-lg px-2.5 py-2"></select>
+                </div>
+                <div class="sm:col-span-3">
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">SL xuất</label>
+                  <input id="outQtyInput" type="number" min="0.1" step="0.1" value="1" class="w-full text-xs font-mono bg-white border border-slate-200 rounded-lg px-2.5 py-2" />
+                </div>
+                <div class="sm:col-span-2">
+                  <button id="btnConfirmStockOut" type="button" class="w-full py-2 px-3 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700">Xuất lô</button>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-500 italic">Cơ chế QĐ05: Nguyên liệu pha chế đơn hàng được hệ thống tự động trừ kho FEFO khi bấm "Lưu &amp; Pha chế" ở BM01.</p>
+            </div>
+
+            <!-- Stock History Log -->
+            <div>
+              <h3 class="text-xs font-bold text-slate-700 mb-2">Lịch sử biến động kho gần đây (LichSuKho)</h3>
+              <div class="max-h-56 overflow-y-auto border border-slate-200 rounded-xl">
+                <table class="w-full text-xs text-left">
+                  <thead class="bg-slate-100 text-slate-600 font-bold">
+                    <tr>
+                      <th class="py-2 px-2.5">Mã GD</th>
+                      <th class="py-2 px-2.5">Loại</th>
+                      <th class="py-2 px-2.5">Chi tiết lô</th>
+                      <th class="py-2 px-2.5 text-right">Biến động</th>
+                    </tr>
+                  </thead>
+                  <tbody id="stockHistoryBody" class="divide-y divide-slate-100"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Current Inventory Lots FEFO (5 cols) -->
+          <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+            <div class="flex items-center justify-between">
+              <h2 class="text-sm font-bold text-slate-800">Tồn kho theo lô (FEFO)</h2>
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-matcha-50 text-matcha-700" id="lotBranchTag">CN Biên Hòa</span>
+            </div>
+            <div id="inventoryLotsList" class="space-y-2 max-h-[430px] overflow-y-auto pr-1"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- SCREEN BM04: HÓA ĐƠN BÁN HÀNG                             -->
+      <!-- ========================================================= -->
+      <section id="screen-bm04" class="screen-panel hidden space-y-4">
+        <div>
+          <h1 class="text-lg sm:text-xl font-extrabold text-slate-800">Hóa đơn bán hàng (BM04)</h1>
+          <p class="text-xs text-slate-500">Tra cứu hóa đơn, xác nhận thu tiền đơn COD và in hóa đơn giao khách</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+          <!-- Left: Invoice List (5 cols) -->
+          <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+            <input id="invSearchInput" type="text" placeholder="Tìm mã HĐ (HD-...), mã đơn hoặc SĐT..." class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-matcha-500" />
+            <div id="invoiceListContainer" class="space-y-2 max-h-[480px] overflow-y-auto pr-1"></div>
+          </div>
+
+          <!-- Right: Printable Receipt Preview (7 cols) -->
+          <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+            <div id="printInvoiceArea" class="border border-slate-200 rounded-xl p-5 bg-milk/40 space-y-3">
+              <div class="text-center border-b border-dashed border-slate-300 pb-3">
+                <div class="font-extrabold text-base text-matcha-800 uppercase tracking-wide" id="invStoreTitle">TRÀ SỮA MÂY XANH — CHI NHÁNH BIÊN HÒA</div>
+                <div class="text-xs text-slate-500 mt-0.5" id="invStoreAddress">ĐC: 45 Võ Thị Sáu, P. Thống Nhất, Biên Hòa · Hotline: 0251.388.9999</div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span class="text-slate-500">Mã HĐ:</span>
+                  <span id="invDetailId" class="font-mono font-bold text-slate-800">HD-20261112-0042</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-slate-500">Ngày lập:</span>
+                  <span id="invDetailDate" class="font-semibold text-slate-700">12/11/2026 12:45</span>
+                </div>
+                <div>
+                  <span class="text-slate-500">Mã đơn:</span>
+                  <span id="invDetailOrderId" class="font-mono text-slate-700">DH-20261112-0042</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-slate-500">Kênh:</span>
+                  <span id="invDetailChannel" class="font-semibold text-slate-700">Ứng dụng · Giao hàng</span>
+                </div>
+                <div class="col-span-2 flex flex-wrap justify-between items-center pt-1">
+                  <span>Khách hàng: <strong id="invDetailCustomer">Nguyễn Thảo Vy (0901234567)</strong></span>
+                  <span id="invDetailPayStatus" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700">Chuyển khoản · Đã thanh toán</span>
+                </div>
+                <div id="invDetailDeliveryRow" class="col-span-2 text-slate-600 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 hidden"></div>
+              </div>
+
+              <!-- Items Table -->
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left border-t border-b border-slate-300">
+                  <thead class="bg-matcha-50 text-matcha-900 font-bold">
+                    <tr>
+                      <th class="py-2 px-2">Sản phẩm &amp; Topping</th>
+                      <th class="py-2 px-2 text-center w-12">SL</th>
+                      <th class="py-2 px-2 text-right w-24">Đơn giá</th>
+                      <th class="py-2 px-2 text-right w-24">Thành tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody id="invDetailItemsBody" class="divide-y divide-slate-200"></tbody>
+                </table>
+              </div>
+
+              <!-- Totals -->
+              <div class="space-y-1 text-xs text-right">
+                <div class="text-slate-600">Tổng tiền hàng: <strong id="invDetailSub">0 đ</strong></div>
+                <div class="text-emerald-700">Giảm giá coupon: <strong id="invDetailCoupon">-0 đ</strong></div>
+                <div class="text-purple-700">Quy đổi điểm tích lũy: <strong id="invDetailPoints">-0 đ</strong></div>
+                <div class="text-slate-600">Phí giao hàng: <strong id="invDetailShip">0 đ</strong></div>
+                <div class="text-base font-extrabold text-matcha-800 pt-1">TỔNG THANH TOÁN: <span id="invDetailTotal">0 đ</span></div>
+              </div>
+
+              <div class="text-[11px] text-slate-400 italic text-center pt-2 border-t border-dashed border-slate-200">
+                Dữ liệu đồng bộ từ DonHang &amp; ThanhToan (MayXanhDB) · Khóa chỉnh sửa trực tiếp tổng tiền.
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-wrap items-center justify-end gap-2">
+              <button id="btnConfirmCodPaid" type="button" class="hidden px-4 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold hover:bg-amber-600">
+                ✓ Xác nhận đã thu tiền COD
+              </button>
+              <button id="btnPrintInvoice" type="button" class="px-4 py-2 rounded-xl bg-matcha-600 text-white text-xs font-bold hover:bg-matcha-700 flex items-center gap-1.5">
+                <span>🖨️ In hóa đơn</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- SCREEN BM05: BÁO CÁO DOANH THU (QUẢN LÝ)                  -->
+      <!-- ========================================================= -->
+      <section id="screen-bm05" class="screen-panel hidden space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 class="text-lg sm:text-xl font-extrabold text-slate-800">Báo cáo doanh thu hệ thống (BM05)</h1>
+            <p class="text-xs text-slate-500">Tổng hợp từ vw_BaoCaoDoanhThu (đã loại trừ đơn hủy theo quy tắc QĐ12)</p>
+          </div>
+          <button id="btnExportCsv" type="button" class="px-4 py-2 rounded-xl bg-matcha-600 text-white text-xs font-bold hover:bg-matcha-700 shadow-xs">
+            📥 Xuất báo cáo (CSV)
+          </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-3.5 shadow-xs flex flex-wrap items-center gap-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-600">Kỳ báo cáo:</span>
+            <select id="repPeriodFilter" class="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+              <option value="month">Tháng 11/2026 (01/11 - 12/11/2026)</option>
+              <option value="today">Hôm nay (12/11/2026)</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-600">Phạm vi chi nhánh:</span>
+            <select id="repBranchFilter" class="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+              <option value="ALL">Toàn hệ thống Mây Xanh</option>
+              <option value="CN_BH">CN Biên Hòa - Võ Thị Sáu</option>
+              <option value="CN_TB">CN Trảng Bom</option>
+              <option value="CN_LK">CN Long Khánh</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 4 KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+            <div class="text-xs font-semibold text-slate-500">Tổng đơn hàng / Đơn hủy</div>
+            <div class="mt-1.5 flex items-baseline gap-2">
+              <span id="kpiTotalOrders" class="text-2xl font-extrabold text-slate-800">1.240</span>
+              <span id="kpiCanceledOrders" class="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">/ 18 hủy</span>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+            <div class="text-xs font-semibold text-slate-500">Doanh thu gộp</div>
+            <div id="kpiGrossRev" class="mt-1.5 text-2xl font-extrabold text-blue-700">54.800.000 đ</div>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+            <div class="text-xs font-semibold text-slate-500">Tổng giảm giá (Coupon &amp; Điểm)</div>
+            <div id="kpiDiscountRev" class="mt-1.5 text-2xl font-extrabold text-amber-600">-4.150.000 đ</div>
+          </div>
+          <div class="bg-matcha-600 text-white rounded-2xl p-4 shadow-sm">
+            <div class="text-xs font-semibold text-matcha-100">Doanh thu thực tế</div>
+            <div id="kpiNetRev" class="mt-1.5 text-2xl font-extrabold">50.650.000 đ</div>
+          </div>
+        </div>
+
+        <!-- Chart + Top 5 Best Sellers -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div class="lg:col-span-6 bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+            <div class="flex items-center justify-between">
+              <h2 class="text-sm font-bold text-slate-800">Biểu đồ doanh thu thực tế theo ngày (triệu đ)</h2>
+              <span class="text-[11px] text-slate-400">Đơn vị: Triệu VNĐ</span>
+            </div>
+            <div id="revenueBarChart" class="h-56 flex items-end justify-around gap-2 pt-6 pb-2 px-2 bg-slate-50 rounded-xl border border-slate-100"></div>
+          </div>
+
+          <div class="lg:col-span-6 bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+            <h2 class="text-sm font-bold text-slate-800">Top 5 sản phẩm bán chạy nhất kỳ</h2>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left">
+                <thead class="bg-matcha-50 text-matcha-900 font-bold">
+                  <tr>
+                    <th class="py-2 px-2.5 w-10">#</th>
+                    <th class="py-2 px-2.5">Tên sản phẩm</th>
+                    <th class="py-2 px-2.5 text-right">Số ly</th>
+                    <th class="py-2 px-2.5 text-right">Doanh thu</th>
+                  </tr>
+                </thead>
+                <tbody id="topProductsBody" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- PRODUCT CUSTOMIZATION MODAL (SIZE & TOPPING) -->
+  <div id="productModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-5 shadow-xl space-y-4">
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <span id="modalProdCat" class="text-[11px] font-bold uppercase tracking-wider text-matcha-600">Trà sữa</span>
+          <h3 id="modalProdName" class="text-lg font-extrabold text-slate-800">Trà Sữa Mây Xanh Đặc Biệt</h3>
+          <p id="modalProdBasePrice" class="text-xs text-slate-500">Giá gốc (Size M): 30.000 đ</p>
+        </div>
+        <button id="btnCloseProdModal" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700">✕</button>
+      </div>
+
+      <!-- Size -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">Chọn kích cỡ</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" data-size="M" data-add="0" class="size-opt-btn py-2 px-3 rounded-xl border-2 border-matcha-600 bg-matcha-50 text-matcha-800 text-xs font-bold">Size M (+0đ)</button>
+          <button type="button" data-size="L" data-add="5000" class="size-opt-btn py-2 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 text-xs font-semibold">Size L (+5.000đ)</button>
+        </div>
+      </div>
+
+      <!-- Toppings -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">Chọn Topping thêm</label>
+        <div id="modalToppingsList" class="grid grid-cols-2 gap-2 text-xs"></div>
+      </div>
+
+      <!-- Quantity -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+        <span class="text-xs font-bold text-slate-700">Số lượng ly:</span>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnModalQtyMinus" class="w-8 h-8 rounded-lg border border-slate-200 font-bold hover:bg-slate-100">-</button>
+          <span id="modalQtyVal" class="w-8 text-center font-bold text-sm">1</span>
+          <button type="button" id="btnModalQtyPlus" class="w-8 h-8 rounded-lg border border-slate-200 font-bold hover:bg-slate-100">+</button>
+        </div>
+      </div>
+
+      <button type="button" id="btnConfirmAddCart" class="w-full py-2.5 rounded-xl bg-matcha-600 text-white text-sm font-bold hover:bg-matcha-700 shadow-sm">
+        Thêm vào đơn · <span id="modalCalcPrice">30.000 đ</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <script>
+    // =========================================================================
+    // 1. SIMULATED DATABASE (MayXanhDB) & BUSINESS RULES (QĐ05, QĐ06, QĐ08, QĐ12)
+    // =========================================================================
+    const BRANCHES = {
+      CN_BH: { name: 'CN Biên Hòa - Võ Thị Sáu', title: 'TRÀ SỮA MÂY XANH — CHI NHÁNH BIÊN HÒA', address: 'ĐC: 45 Võ Thị Sáu, P. Thống Nhất, Biên Hòa · Hotline: 0251.388.9999' },
+      CN_TB: { name: 'CN Trảng Bom', title: 'TRÀ SỮA MÂY XANH — CHI NHÁNH TRẢNG BOM', address: 'ĐC: 112 Đường 30/4, TT. Trảng Bom, Đồng Nai · Hotline: 0251.386.8888' },
+      CN_LK: { name: 'CN Long Khánh', title: 'TRÀ SỮA MÂY XANH — CHI NHÁNH LONG KHÁNH', address: 'ĐC: 88 Hùng Vương, P. Xuân Trung, Long Khánh · Hotline: 0251.377.6666' }
+    };
+
+    const ROLES = {
+      manager: {
+        name: 'Phạm Hoàng Nam',
+        title: 'Quản lý hệ thống',
+        allowed: ['bm01', 'bm02', 'bm03', 'bm04', 'bm05'],
+        desc: 'Quản lý toàn quyền truy cập 5 màn hình nghiệp vụ, điều chỉnh giá, kho và xem báo cáo doanh thu (QĐ12).'
+      },
+      cashier: {
+        name: 'Lê Minh Anh',
+        title: 'Thu ngân',
+        allowed: ['bm01', 'bm04'],
+        desc: 'Thu ngân được phép tiếp nhận đơn hàng (BM01), tra cứu & in hóa đơn (BM04). Khóa kho và báo cáo doanh thu.'
+      },
+      warehouse: {
+        name: 'Trần Quốc Bảo',
+        title: 'Thủ kho',
+        allowed: ['bm02', 'bm03'],
+        desc: 'Thủ kho thực hiện lập phiếu nhập kho (BM02), xuất hủy nguyên liệu hết hạn (BM03) và theo dõi lô FEFO.'
+      }
+    };
+
+    const PRODUCTS = [
+      { id: 'SP01', name: 'Trà Sữa Mây Xanh Đặc Biệt', cat: 'trasua', catName: 'Trà sữa', price: 30000, soldBase: 412, color: 'from-emerald-100 to-teal-200', emoji: '🧋', recipe: [{ matId: 'NL01', qty: 0.03 }, { matId: 'NL02', qty: 0.04 }] },
+      { id: 'SP02', name: 'Trà Ô Long Kem Cheese', cat: 'kemcheese', catName: 'Kem cheese', price: 38000, soldBase: 328, color: 'from-amber-100 to-yellow-200', emoji: '🧀', recipe: [{ matId: 'NL01', qty: 0.03 }, { matId: 'NL03', qty: 0.05 }] },
+      { id: 'SP03', name: 'Trà Đào Cam Sả', cat: 'traicay', catName: 'Trà trái cây', price: 35000, soldBase: 275, color: 'from-orange-100 to-rose-200', emoji: '🍑', recipe: [{ matId: 'NL01', qty: 0.02 }, { matId: 'NL06', qty: 0.08 }] },
+      { id: 'SP04', name: 'Sữa Tươi Trân Châu Đường Đen', cat: 'trasua', catName: 'Trà sữa', price: 36000, soldBase: 219, color: 'from-stone-200 to-amber-200', emoji: '🥛', recipe: [{ matId: 'NL03', qty: 0.15 }, { matId: 'NL04', qty: 0.06 }] },
+      { id: 'SP05', name: 'Trà Vải Hoa Hồng', cat: 'traicay', catName: 'Trà trái cây', price: 35000, soldBase: 164, color: 'from-pink-100 to-rose-200', emoji: '🌸', recipe: [{ matId: 'NL01', qty: 0.02 }, { matId: 'NL05', qty: 0.05 }] },
+      { id: 'SP06', name: 'Matcha Latte Kem Muối', cat: 'kemcheese', catName: 'Kem cheese', price: 42000, soldBase: 148, color: 'from-lime-100 to-emerald-200', emoji: '🍵', recipe: [{ matId: 'NL02', qty: 0.03 }, { matId: 'NL03', qty: 0.10 }] },
+      { id: 'SP07', name: 'Socola Đá Xay Kem Tươi', cat: 'daxay', catName: 'Đá xay', price: 45000, soldBase: 112, color: 'from-amber-200 to-stone-300', emoji: '🍫', recipe: [{ matId: 'NL02', qty: 0.05 }, { matId: 'NL03', qty: 0.10 }] },
+      { id: 'SP08', name: 'Trà Sữa Khoai Môn Nghiền', cat: 'trasua', catName: 'Trà sữa', price: 36000, soldBase: 135, color: 'from-purple-100 to-indigo-200', emoji: '🍠', recipe: [{ matId: 'NL01', qty: 0.02 }, { matId: 'NL02', qty: 0.05 }] }
+    ];
+
+    const TOPPINGS = [
+      { id: 'TP01', name: 'Trân châu đen', price: 7000, matId: 'NL04', qty: 0.04 },
+      { id: 'TP02', name: 'Thạch dừa', price: 6000, matId: 'NL05', qty: 0.04 },
+      { id: 'TP03', name: 'Kem cheese', price: 10000, matId: 'NL03', qty: 0.05 },
+      { id: 'TP04', name: 'Pudding trứng', price: 8000, matId: 'NL02', qty: 0.03 }
+    ];
+
+    const MATERIALS = [
+      { id: 'NL01', name: 'Hồng trà đặc biệt', unit: 'Kg', defaultPrice: 165000 },
+      { id: 'NL02', name: 'Bột sữa béo thực vật', unit: 'Bao', defaultPrice: 420000 },
+      { id: 'NL03', name: 'Sữa tươi thanh trùng', unit: 'Hộp', defaultPrice: 32000 },
+      { id: 'NL04', name: 'Trân châu đen', unit: 'Túi', defaultPrice: 45000 },
+      { id: 'NL05', name: 'Trân châu trắng / Thạch', unit: 'Túi', defaultPrice: 48000 },
+      { id: 'NL06', name: 'Đào ngâm hộp lớn', unit: 'Hộp', defaultPrice: 65000 }
+    ];
+
+    const COUPONS = {
+      MAYXANH10: { code: 'MAYXANH10', type: 'percent', value: 10, label: 'Giảm 10%' },
+      MAYXANH20K: { code: 'MAYXANH20K', type: 'fixed', value: 20000, label: 'Giảm 20.000đ' }
+    };
+
+    const CUSTOMERS = {
+      '0901234567': { phone: '0901234567', name: 'Nguyễn Thảo Vy', points: 420 },
+      '0918889999': { phone: '0918889999', name: 'Đặng Minh Khoa', points: 250 },
+      '0987654321': { phone: '0987654321', name: 'Võ Ngọc Hân', points: 600 }
+    };
+
+    // State
+    let state = {
+      branch: 'CN_BH',
+      role: 'manager',
+      activeScreen: 'bm01',
+      orderSeq: 43,
+      inSeq: 10,
+      outSeq: 5,
+      cart: [],
+      selectedCustomer: null,
+      appliedCoupon: null,
+      paymentMethod: 'Tiền mặt',
+      // Inventory Lots (LoNguyenLieu)
+      lots: [
+        { lotCode: 'LOT-2610S', branch: 'CN_BH', matId: 'NL03', matName: 'Sữa tươi thanh trùng', unit: 'Hộp', qty: 4, expiry: '2026-11-11' },
+        { lotCode: 'LOT-2609T', branch: 'CN_BH', matId: 'NL05', matName: 'Trân châu trắng / Thạch', unit: 'Túi', qty: 2, expiry: '2026-11-10' },
+        { lotCode: 'LOT-2611A', branch: 'CN_BH', matId: 'NL01', matName: 'Hồng trà đặc biệt', unit: 'Kg', qty: 18.5, expiry: '2027-05-12' },
+        { lotCode: 'LOT-2611B', branch: 'CN_BH', matId: 'NL02', matName: 'Bột sữa béo thực vật', unit: 'Bao', qty: 9.2, expiry: '2027-08-10' },
+        { lotCode: 'LOT-2611C', branch: 'CN_BH', matId: 'NL03', matName: 'Sữa tươi thanh trùng', unit: 'Hộp', qty: 24, expiry: '2026-12-20' },
+        { lotCode: 'LOT-2611D', branch: 'CN_BH', matId: 'NL04', matName: 'Trân châu đen', unit: 'Túi', qty: 15, expiry: '2027-02-15' },
+        { lotCode: 'LOT-2611E', branch: 'CN_BH', matId: 'NL06', matName: 'Đào ngâm hộp lớn', unit: 'Hộp', qty: 12, expiry: '2027-04-01' },
+        { lotCode: 'LOT-TB01', branch: 'CN_TB', matId: 'NL01', matName: 'Hồng trà đặc biệt', unit: 'Kg', qty: 12, expiry: '2027-05-15' },
+        { lotCode: 'LOT-LK01', branch: 'CN_LK', matId: 'NL01', matName: 'Hồng trà đặc biệt', unit: 'Kg', qty: 10, expiry: '2027-05-18' }
+      ],
+      stockLogs: [
+        { code: 'PN-20261112-009', type: 'Nhập kho', detail: 'LOT-2611A (Hồng trà đặc biệt)', delta: '+20 Kg', positive: true },
+        { code: 'DH-20261112-0042', type: 'Pha chế FEFO', detail: 'LOT-2611A, LOT-2611D', delta: '-0.12', positive: false }
+      ],
+      invoices: [
+        {
+          invoiceId: 'HD-20261112-0042',
+          orderId: 'DH-20261112-0042',
+          branch: 'CN_BH',
+          date: '12/11/2026 12:45',
+          isToday: true,
+          channel: 'Ứng dụng',
+          orderType: 'delivery',
+          customerName: 'Nguyễn Thảo Vy',
+          customerPhone: '0901234567',
+          deliveryInfo: 'Nguyễn Thảo Vy · 128 Nguyễn Ái Quốc, Biên Hòa (2.4 km)',
+          items: [
+            { name: 'Trà Sữa Mây Xanh Đặc Biệt (Size L)', toppings: 'Trân châu đen', qty: 2, unitPrice: 42000 },
+            { name: 'Trà Ô Long Kem Cheese (Size M)', toppings: 'Thạch dừa', qty: 1, unitPrice: 44000 }
+          ],
+          subtotal: 128000,
+          couponCode: 'MAYXANH10',
+          couponDiscount: 12800,
+          pointDiscount: 10000,
+          shippingFee: 0,
+          total: 105200,
+          paymentMethod: 'Chuyển khoản',
+          paid: true
+        },
+        {
+          invoiceId: 'HD-20261112-0041',
+          orderId: 'DH-20261112-0041',
+          branch: 'CN_BH',
+          date: '12/11/2026 11:20',
+          isToday: true,
+          channel: 'Điện thoại',
+          orderType: 'delivery',
+          customerName: 'Đặng Minh Khoa',
+          customerPhone: '0918889999',
+          deliveryInfo: 'Đặng Minh Khoa · 74 Đồng Khởi, Biên Hòa (4.2 km)',
+          items: [
+            { name: 'Trà Đào Cam Sả (Size L)', toppings: 'Không', qty: 2, unitPrice: 40000 }
+          ],
+          subtotal: 80000,
+          couponCode: null,
+          couponDiscount: 0,
+          pointDiscount: 0,
+          shippingFee: 15000,
+          total: 95000,
+          paymentMethod: 'COD',
+          paid: false
+        }
+      ],
+      selectedInvoiceId: 'HD-20261112-0042',
+      inDraftRows: [
+        { matId: 'NL01', qty: 20, unitPrice: 165000, lotCode: 'LOT-2611F', expiry: '2027-06-15' },
+        { matId: 'NL02', qty: 10, unitPrice: 420000, lotCode: 'LOT-2611G', expiry: '2027-08-20' }
+      ]
+    };
+
+    // Helpers
+    const fmt = n => Math.round(n).toLocaleString('vi-VN') + ' đ';
+    const pad4 = n => String(n).padStart(4, '0');
+    const pad3 = n => String(n).padStart(3, '0');
+
+    function showToast(msg, type = 'success') {
+      const wrap = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      const styles = {
+        success: 'bg-matcha-700 text-white border-matcha-800',
+        error: 'bg-rose-600 text-white border-rose-800',
+        warning: 'bg-amber-500 text-white border-amber-700'
+      };
+      el.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-lg text-xs font-semibold flex items-center gap-2 transition-all duration-300 ${styles[type] || styles.success}`;
+      el.innerHTML = `<span>${type === 'error' ? '⚠️' : type === 'warning' ? '🔔' : '✅'}</span><span>${msg}</span>`;
+      wrap.appendChild(el);
+      setTimeout(() => {
+        el.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => el.remove(), 300);
+      }, 3200);
+    }
+
+    // =========================================================================
+    // 2. NAVIGATION & RBAC PERMISSIONS (QĐ12)
+    // =========================================================================
+    function applyRolePermissions() {
+      const roleObj = ROLES[state.role];
+      document.getElementById('roleDescText').textContent = roleObj.desc;
+      document.getElementById('inStaffDisplay').value = `${roleObj.name} (${roleObj.title})`;
+
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        const navKey = btn.dataset.nav;
+        const allowed = roleObj.allowed.includes(navKey);
+        btn.classList.toggle('hidden', !allowed);
+      });
+
+      if (!roleObj.allowed.includes(state.activeScreen)) {
+        switchScreen(roleObj.allowed[0]);
+      } else {
+        updateNavHighlight();
+      }
+    }
+
+    function updateNavHighlight() {
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        const active = btn.dataset.nav === state.activeScreen;
+        btn.classList.toggle('bg-matcha-600', active);
+        btn.classList.toggle('text-white', active);
+        btn.classList.toggle('text-slate-700', !active);
+        btn.classList.toggle('hover:bg-slate-100', !active);
+      });
+    }
+
+    function switchScreen(screenKey) {
+      const roleObj = ROLES[state.role];
+      if (!roleObj.allowed.includes(screenKey)) {
+        showToast(`Vai trò ${roleObj.title} không có quyền truy cập phân hệ này (QĐ12).`, 'error');
+        return;
+      }
+      state.activeScreen = screenKey;
+      document.querySelectorAll('.screen-panel').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`screen-${screenKey}`).classList.remove('hidden');
+      updateNavHighlight();
+
+      // Close mobile sidebar if open
+      document.getElementById('sidebar').classList.add('-translate-x-full');
+
+      if (screenKey === 'bm02') renderStockInTable();
+      if (screenKey === 'bm03') renderStockOutScreen();
+      if (screenKey === 'bm04') renderInvoicesScreen();
+      if (screenKey === 'bm05') renderReportScreen();
+    }
+
+    // =========================================================================
+    // 3. BM01: POS ORDERING & CART ENGINE
+    // =========================================================================
+    let modalState = { product: null, size: 'M', sizeAdd: 0, toppings: [], qty: 1 };
+
+    function renderPosProducts() {
+      const query = document.getElementById('posSearchInput').value.trim().toLowerCase();
+      const activeCat = document.querySelector('.cat-btn.bg-matcha-600')?.dataset.cat || 'all';
+      const grid = document.getElementById('posProductGrid');
+
+      const filtered = PRODUCTS.filter(p => {
+        const matchCat = activeCat === 'all' || p.cat === activeCat;
+        const matchText = p.name.toLowerCase().includes(query);
+        return matchCat && matchText;
+      });
+
+      if (!filtered.length) {
+        grid.innerHTML = `<div class="col-span-full py-10 text-center text-xs text-slate-400">Không tìm thấy sản phẩm phù hợp</div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => `
+        <button type="button" onclick="openProductModal('${p.id}')" class="group text-left bg-white border border-slate-200 hover:border-matcha-500 rounded-2xl p-3 transition shadow-2xs hover:shadow-md flex flex-col justify-between">
+          <div>
+            <div class="w-full h-24 rounded-xl bg-gradient-to-br ${p.color} flex items-center justify-center text-4xl mb-2.5 group-hover:scale-105 transition-transform">
+              ${p.emoji}
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-matcha-600">${p.catName}</span>
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800 line-clamp-2 mt-0.5 leading-snug">${p.name}</h3>
+          </div>
+          <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-xs sm:text-sm font-extrabold text-matcha-700">${fmt(p.price)}</span>
+            <span class="w-6 h-6 rounded-lg bg-matcha-50 text-matcha-700 font-bold text-sm flex items-center justify-center group-hover:bg-matcha-600 group-hover:text-white transition">+</span>
+          </div>
+        </button>
+      `).join('');
+    }
+
+    function openProductModal(prodId) {
+      const prod = PRODUCTS.find(p => p.id === prodId);
+      if (!prod) return;
+      modalState = { product: prod, size: 'M', sizeAdd: 0, toppings: [], qty: 1 };
+
+      document.getElementById('modalProdCat').textContent = prod.catName;
+      document.getElementById('modalProdName').textContent = prod.name;
+      document.getElementById('modalProdBasePrice').textContent = `Giá gốc (Size M): ${fmt(prod.price)}`;
+      document.getElementById('modalQtyVal').textContent = '1';
+
+      document.querySelectorAll('.size-opt-btn').forEach(b => {
+        const isM = b.dataset.size === 'M';
+        b.className = isM
+          ? 'size-opt-btn py-2 px-3 rounded-xl border-2 border-matcha-600 bg-matcha-50 text-matcha-800 text-xs font-bold'
+          : 'size-opt-btn py-2 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 text-xs font-semibold';
+      });
+
+      document.getElementById('modalToppingsList').innerHTML = TOPPINGS.map(tp => `
+        <label class="flex items-center justify-between p-2 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+          <span class="flex items-center gap-1.5">
+            <input type="checkbox" value="${tp.id}" class="modal-tp-chk rounded text-matcha-600" onchange="updateModalCalcPrice()" />
+            <span class="font-medium text-slate-700">${tp.name}</span>
+          </span>
+          <span class="font-bold text-matcha-700">+${tp.price / 1000}k</span>
+        </label>
+      `).join('');
+
+      updateModalCalcPrice();
+      const m = document.getElementById('productModal');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+    }
+
+    function updateModalCalcPrice() {
+      const checkedIds = Array.from(document.querySelectorAll('.modal-tp-chk:checked')).map(c => c.value);
+      modalState.toppings = TOPPINGS.filter(t => checkedIds.includes(t.id));
+      const tpSum = modalState.toppings.reduce((acc, t) => acc + t.price, 0);
+      const unit = modalState.product.price + modalState.sizeAdd + tpSum;
+      document.getElementById('modalCalcPrice').textContent = fmt(unit * modalState.qty);
+    }
+
+    function addConfiguredProductToCart() {
+      const tpSum = modalState.toppings.reduce((acc, t) => acc + t.price, 0);
+      const unitPrice = modalState.product.price + modalState.sizeAdd + tpSum;
+      const tpNames = modalState.toppings.map(t => t.name).join(', ') || 'Không topping';
+      const sig = `${modalState.product.id}_${modalState.size}_${tpNames}`;
+
+      const existing = state.cart.find(item => item.sig === sig);
+      if (existing) {
+        existing.qty += modalState.qty;
+      } else {
+        state.cart.push({
+          sig,
+          productId: modalState.product.id,
+          name: `${modalState.product.name} (Size ${modalState.size})`,
+          toppings: tpNames,
+          toppingIds: modalState.toppings.map(t => t.id),
+          qty: modalState.qty,
+          unitPrice
+        });
+      }
+
+      document.getElementById('productModal').classList.add('hidden');
+      document.getElementById('productModal').classList.remove('flex');
+      renderCartAndTotals();
+      showToast(`Đã thêm ${modalState.qty}x ${modalState.product.name}`);
+    }
+
+    function changeCartQty(idx, delta) {
+      state.cart[idx].qty += delta;
+      if (state.cart[idx].qty <= 0) state.cart.splice(idx, 1);
+      renderCartAndTotals();
+    }
+
+    function renderCartAndTotals() {
+      const listEl = document.getElementById('posCartList');
+      const totalCups = state.cart.reduce((s, i) => s + i.qty, 0);
+      document.getElementById('cartCountLabel').textContent = totalCups;
+
+      if (!state.cart.length) {
+        listEl.innerHTML = `<div class="py-6 text-center text-xs text-slate-400">Chưa có sản phẩm nào trong đơn</div>`;
+      } else {
+        listEl.innerHTML = state.cart.map((item, idx) => `
+          <div class="py-2.5 flex items-center justify-between gap-2 text-xs">
+            <div class="min-w-0 flex-1">
+              <div class="font-bold text-slate-800 truncate">${item.name}</div>
+              <div class="text-[11px] text-slate-500 truncate">${item.toppings} · ${fmt(item.unitPrice)}</div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="changeCartQty(${idx}, -1)" class="w-6 h-6 rounded-md bg-white border border-slate-200 font-bold hover:bg-slate-100">-</button>
+              <span class="w-5 text-center font-bold">${item.qty}</span>
+              <button type="button" onclick="changeCartQty(${idx}, 1)" class="w-6 h-6 rounded-md bg-white border border-slate-200 font-bold hover:bg-slate-100">+</button>
+              <span class="w-20 text-right font-extrabold text-matcha-700">${fmt(item.qty * item.unitPrice)}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Calculate Subtotal
+      const subtotal = state.cart.reduce((s, i) => s + i.qty * i.unitPrice, 0);
+
+      // Coupon discount
+      let couponDiscount = 0;
+      if (state.appliedCoupon && subtotal > 0) {
+        if (state.appliedCoupon.type === 'percent') {
+          couponDiscount = Math.round(subtotal * (state.appliedCoupon.value / 100));
+        } else {
+          couponDiscount = Math.min(subtotal, state.appliedCoupon.value);
+        }
+        document.getElementById('appliedCouponName').textContent = state.appliedCoupon.code;
+      } else {
+        document.getElementById('appliedCouponName').textContent = 'Không';
+      }
+
+      // Loyalty Points (QĐ08: 1 điểm = 100đ, tối đa 50% giá trị đơn hàng)
+      const ptsInput = document.getElementById('posPointsUse');
+      let requestedPts = Math.max(0, parseInt(ptsInput.value || '0', 10));
+      const availablePts = state.selectedCustomer ? state.selectedCustomer.points : 0;
+      if (requestedPts > availablePts) {
+        requestedPts = availablePts;
+        ptsInput.value = requestedPts;
+      }
+      let pointDiscount = requestedPts * 100;
+      const maxPointDiscount = Math.floor(subtotal * 0.5);
+      if (pointDiscount > maxPointDiscount && subtotal > 0) {
+        pointDiscount = maxPointDiscount;
+      }
+
+      // Shipping Fee (QĐ06: Free if <= 3km or subtotal >= 150.000đ, else 15.000đ)
+      const orderType = document.getElementById('posOrderType').value;
+      let shippingFee = 0;
+      if (orderType === 'delivery' && subtotal > 0) {
+        const dist = parseFloat(document.getElementById('delivDistance').value || '0');
+        shippingFee = (dist <= 3 || subtotal >= 150000) ? 0 : 15000;
+      }
+
+      const grandTotal = Math.max(0, subtotal - couponDiscount - pointDiscount + shippingFee);
+
+      document.getElementById('sumSubtotal').textContent = fmt(subtotal);
+      document.getElementById('sumCouponDiscount').textContent = `-${fmt(couponDiscount)}`;
+      document.getElementById('sumPointDiscount').textContent = `-${fmt(pointDiscount)}`;
+      document.getElementById('sumShippingFee').textContent = shippingFee === 0 && orderType === 'delivery' ? '0 đ (Miễn phí QĐ06)' : fmt(shippingFee);
+      document.getElementById('sumGrandTotal').textContent = fmt(grandTotal);
+
+      return { subtotal, couponDiscount, pointDiscount, shippingFee, grandTotal, usedPoints: Math.floor(pointDiscount / 100) };
+    }
+
+    // FEFO Stock Deduction (QĐ05)
+    function deductInventoryFEFO(cartItems, orderCode) {
+      const today = '2026-11-12';
+      // Aggregate required materials
+      const needed = {};
+      cartItems.forEach(item => {
+        const prod = PRODUCTS.find(p => p.id === item.productId);
+        if (prod) {
+          prod.recipe.forEach(r => {
+            needed[r.matId] = (needed[r.matId] || 0) + r.qty * item.qty;
+          });
+        }
+        item.toppingIds.forEach(tpId => {
+          const tp = TOPPINGS.find(t => t.id === tpId);
+          if (tp) {
+            needed[tp.matId] = (needed[tp.matId] || 0) + tp.qty * item.qty;
+          }
+        });
+      });
+
+      const usedLots = [];
+      Object.entries(needed).forEach(([matId, reqQty]) => {
+        let remaining = Number(reqQty.toFixed(2));
+        // Sort valid non-expired lots of current branch by earliest expiry (FEFO)
+        const branchLots = state.lots
+          .filter(l => l.branch === state.branch && l.matId === matId && l.qty > 0 && l.expiry >= today)
+          .sort((a, b) => a.expiry.localeCompare(b.expiry));
+
+        for (const lot of branchLots) {
+          if (remaining <= 0) break;
+          const take = Math.min(lot.qty, remaining);
+          lot.qty = Number((lot.qty - take).toFixed(2));
+          remaining = Number((remaining - take).toFixed(2));
+          if (!usedLots.includes(lot.lotCode)) usedLots.push(lot.lotCode);
+        }
+      });
+
+      state.stockLogs.unshift({
+        code: orderCode,
+        type: 'Pha chế FEFO',
+        detail: usedLots.length ? usedLots.join(', ') : 'Xuất kho theo định mức',
+        delta: `-${cartItems.reduce((s, i) => s + i.qty, 0)} ly`,
+        positive: false
+      });
+    }
+
+    function handleSaveAndBrew() {
+      if (!state.cart.length) {
+        showToast('Đơn hàng phải có ít nhất một dòng sản phẩm!', 'error');
+        return;
+      }
+
+      const orderType = document.getElementById('posOrderType').value;
+      const receiver = document.getElementById('delivReceiver').value.trim();
+      const address = document.getElementById('delivAddress').value.trim();
+      const distance = parseFloat(document.getElementById('delivDistance').value || '0');
+
+      if (orderType === 'delivery' && (!receiver || !address)) {
+        showToast('Đơn giao hàng bắt buộc nhập tên người nhận và địa chỉ!', 'error');
+        return;
+      }
+
+      if (state.paymentMethod === 'Chuyển khoản' && !document.getElementById('chkTransferReceived').checked) {
+        showToast('Đơn chuyển khoản chưa xác nhận nhận tiền không được chuyển sang pha chế!', 'warning');
+        return;
+      }
+
+      if (state.paymentMethod === 'COD' && orderType !== 'delivery') {
+        showToast('Phương thức COD chỉ áp dụng cho đơn giao hàng!', 'error');
+        return;
+      }
+
+      const totals = renderCartAndTotals();
+      const orderCode = `DH-20261112-${pad4(state.orderSeq)}`;
+      const invoiceCode = `HD-20261112-${pad4(state.orderSeq)}`;
+      state.orderSeq++;
+
+      // Deduct customer points if used, add new points (+1 pt per 10.000đ)
+      if (state.selectedCustomer) {
+        state.selectedCustomer.points = Math.max(0, state.selectedCustomer.points - totals.usedPoints) + Math.floor(totals.grandTotal / 10000);
+      }
+
+      // Deduct stock FEFO (QĐ05)
+      deductInventoryFEFO(state.cart, orderCode);
+
+      // Create Invoice & Order record
+      const isPaid = state.paymentMethod !== 'COD';
+      const newInvoice = {
+        invoiceId: invoiceCode,
+        orderId: orderCode,
+        branch: state.branch,
+        date: '12/11/2026 13:50',
+        isToday: true,
+        channel: document.getElementById('posChannel').value,
+        orderType,
+        customerName: state.selectedCustomer ? state.selectedCustomer.name : 'Khách lẻ tại quầy',
+        customerPhone: state.selectedCustomer ? state.selectedCustomer.phone : '',
+        deliveryInfo: orderType === 'delivery' ? `${receiver} · ${address} (${distance} km)` : '',
+        items: state.cart.map(c => ({ name: c.name, toppings: c.toppings, qty: c.qty, unitPrice: c.unitPrice })),
+        subtotal: totals.subtotal,
+        couponCode: state.appliedCoupon ? state.appliedCoupon.code : null,
+        couponDiscount: totals.couponDiscount,
+        pointDiscount: totals.pointDiscount,
+        shippingFee: totals.shippingFee,
+        total: totals.grandTotal,
+        paymentMethod: state.paymentMethod,
+        paid: isPaid
+      };
+
+      state.invoices.unshift(newInvoice);
+      state.selectedInvoiceId = invoiceCode;
+
+      // Reset POS draft
+      state.cart = [];
+      state.appliedCoupon = null;
+      document.getElementById('posCouponInput').value = '';
+      document.getElementById('posPointsUse').value = '0';
+      document.getElementById('chkTransferReceived').checked = false;
+      document.getElementById('posOrderCodeBadge').textContent = `DH-20261112-${pad4(state.orderSeq)}`;
+      if (state.selectedCustomer) {
+        document.getElementById('customerPointsBadge').textContent = `${state.selectedCustomer.name} (${state.selectedCustomer.points} điểm)`;
+      }
+      renderCartAndTotals();
+
+      showToast(`Đã lưu đơn ${orderCode}, lập HĐ ${invoiceCode} & trừ kho FEFO!`);
+    }
+
+    // =========================================================================
+    // 4. BM02: STOCK IN RECEIPT
+    // =========================================================================
+    function renderStockInTable() {
+      document.getElementById('inBranchDisplay').value = BRANCHES[state.branch].name;
+      document.getElementById('inReceiptCode').textContent = `PN-20261112-${pad3(state.inSeq)}`;
+
+      const tbody = document.getElementById('inRowsBody');
+      let total = 0;
+
+      tbody.innerHTML = state.inDraftRows.map((row, idx) => {
+        const mat = MATERIALS.find(m => m.id === row.matId) || MATERIALS[0];
+        const lineTotal = (row.qty || 0) * (row.unitPrice || 0);
+        total += lineTotal;
+
+        const matOptions = MATERIALS.map(m => `<option value="${m.id}" ${m.id === row.matId ? 'selected' : ''}>${m.name}</option>`).join('');
+
+        return `
+          <tr>
+            <td class="py-2 px-3">
+              <select onchange="updateInRow(${idx}, 'matId', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 font-semibold">
+                ${matOptions}
+              </select>
+            </td>
+            <td class="py-2 px-2 font-semibold text-slate-600">${mat.unit}</td>
+            <td class="py-2 px-2">
+              <input type="number" min="1" value="${row.qty}" onchange="updateInRow(${idx}, 'qty', +this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 font-mono" />
+            </td>
+            <td class="py-2 px-2">
+              <input type="number" min="0" step="1000" value="${row.unitPrice}" onchange="updateInRow(${idx}, 'unitPrice', +this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 font-mono" />
+            </td>
+            <td class="py-2 px-2">
+              <input type="text" value="${row.lotCode}" onchange="updateInRow(${idx}, 'lotCode', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 font-mono uppercase" />
+            </td>
+            <td class="py-2 px-2">
+              <input type="date" value="${row.expiry}" onchange="updateInRow(${idx}, 'expiry', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5" />
+            </td>
+            <td class="py-2 px-3 text-right font-bold text-slate-800">${fmt(lineTotal)}</td>
+            <td class="py-2 px-2 text-center">
+              <button type="button" onclick="removeInRow(${idx})" class="text-rose-500 hover:text-rose-700 font-bold">✕</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('inTotalAmount').textContent = fmt(total);
+    }
+
+    function updateInRow(idx, field, val) {
+      state.inDraftRows[idx][field] = val;
+      if (field === 'matId') {
+        const mat = MATERIALS.find(m => m.id === val);
+        if (mat) state.inDraftRows[idx].unitPrice = mat.defaultPrice;
+      }
+      renderStockInTable();
+    }
+
+    function removeInRow(idx) {
+      if (state.inDraftRows.length <= 1) {
+        showToast('Phiếu nhập phải có ít nhất một dòng nguyên liệu!', 'warning');
+        return;
+      }
+      state.inDraftRows.splice(idx, 1);
+      renderStockInTable();
+    }
+
+    function confirmStockIn() {
+      const inDate = document.getElementById('inDate').value;
+      for (const r of state.inDraftRows) {
+        if (!r.qty || r.qty <= 0 || r.unitPrice < 0 || !r.lotCode.trim() || !r.expiry) {
+          showToast('Vui lòng kiểm tra SL > 0, đơn giá >= 0, mã lô và hạn sử dụng!', 'error');
+          return;
+        }
+        if (r.expiry <= inDate) {
+          showToast(`Lô ${r.lotCode}: Hạn sử dụng phải lớn hơn ngày nhập kho!`, 'error');
+          return;
+        }
+      }
+
+      const pnCode = `PN-20261112-${pad3(state.inSeq)}`;
+      state.inSeq++;
+
+      state.inDraftRows.forEach(r => {
+        const mat = MATERIALS.find(m => m.id === r.matId);
+        state.lots.push({
+          lotCode: r.lotCode.trim().toUpperCase(),
+          branch: state.branch,
+          matId: mat.id,
+          matName: mat.name,
+          unit: mat.unit,
+          qty: Number(r.qty),
+          expiry: r.expiry
+        });
+        state.stockLogs.unshift({
+          code: pnCode,
+          type: 'Nhập kho',
+          detail: `${r.lotCode.toUpperCase()} (${mat.name})`,
+          delta: `+${r.qty} ${mat.unit}`,
+          positive: true
+        });
+      });
+
+      state.inDraftRows = [{ matId: 'NL04', qty: 15, unitPrice: 45000, lotCode: `LOT-2611H`, expiry: '2027-07-10' }];
+      renderStockInTable();
+      showToast(`Đã xác nhận phiếu nhập ${pnCode} và cập nhật tồn kho theo lô!`);
+    }
+
+    // =========================================================================
+    // 5. BM03: STOCK OUT & FEFO LOTS VIEW
+    // =========================================================================
+    function renderStockOutScreen() {
+      document.getElementById('outReceiptCode').textContent = `PX-20261112-${pad3(state.outSeq)}`;
+      document.getElementById('lotBranchTag').textContent = BRANCHES[state.branch].name;
+
+      const today = '2026-11-12';
+      const branchLots = state.lots
+        .filter(l => l.branch === state.branch && l.qty > 0)
+        .sort((a, b) => a.expiry.localeCompare(b.expiry));
+
+      const selectEl = document.getElementById('outLotSelect');
+      selectEl.innerHTML = branchLots.map(l => {
+        const isExpired = l.expiry < today;
+        return `<option value="${l.lotCode}">${l.lotCode} · ${l.matName} (Tồn: ${l.qty} ${l.unit} · HSD: ${l.expiry}${isExpired ? ' ⚠️ HẾT HẠN' : ''})</option>`;
+      }).join('');
+
+      const listEl = document.getElementById('inventoryLotsList');
+      listEl.innerHTML = branchLots.map(l => {
+        const isExpired = l.expiry < today;
+        return `
+          <div class="p-3 rounded-xl border ${isExpired ? 'border-rose-300 bg-rose-50/70' : 'border-slate-200 bg-slate-50/60'} flex items-center justify-between gap-2 text-xs">
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="font-mono font-bold text-slate-800">${l.lotCode}</span>
+                ${isExpired ? '<span class="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold">Hết hạn</span>' : '<span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-bold">FEFO OK</span>'}
+              </div>
+              <div class="font-semibold text-slate-700 mt-0.5">${l.matName}</div>
+              <div class="text-[11px] ${isExpired ? 'text-rose-700 font-bold' : 'text-slate-500'}">HSD: ${l.expiry}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-extrabold ${isExpired ? 'text-rose-700' : 'text-matcha-700'}">${l.qty} ${l.unit}</div>
+              <div class="text-[10px] text-slate-400">Tồn lô</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const histBody = document.getElementById('stockHistoryBody');
+      histBody.innerHTML = state.stockLogs.slice(0, 10).map(log => `
+        <tr>
+          <td class="py-2 px-2.5 font-mono font-semibold text-slate-700">${log.code}</td>
+          <td class="py-2 px-2.5 font-semibold">${log.type}</td>
+          <td class="py-2 px-2.5 text-slate-500">${log.detail}</td>
+          <td class="py-2 px-2.5 text-right font-bold ${log.positive ? 'text-emerald-600' : 'text-rose-600'}">${log.delta}</td>
+        </tr>
+      `).join('');
+    }
+
+    function confirmStockOut() {
+      const lotCode = document.getElementById('outLotSelect').value;
+      const qtyOut = parseFloat(document.getElementById('outQtyInput').value || '0');
+      const reason = document.getElementById('outReason').value;
+
+      const lot = state.lots.find(l => l.lotCode === lotCode && l.branch === state.branch);
+      if (!lot) return;
+
+      if (qtyOut <= 0 || qtyOut > lot.qty) {
+        showToast(`Số lượng xuất phải > 0 và không vượt quá tồn lô (${lot.qty} ${lot.unit})!`, 'error');
+        return;
+      }
+
+      lot.qty = Number((lot.qty - qtyOut).toFixed(2));
+      const pxCode = `PX-20261112-${pad3(state.outSeq)}`;
+      state.outSeq++;
+
+      state.stockLogs.unshift({
+        code: pxCode,
+        type: reason.includes('hủy') ? 'Xuất hủy' : 'Xuất kho',
+        detail: `${lot.lotCode} (${lot.matName})`,
+        delta: `-${qtyOut} ${lot.unit}`,
+        positive: false
+      });
+
+      renderStockOutScreen();
+      showToast(`Đã lập phiếu xuất ${pxCode} trừ ${qtyOut} ${lot.unit} từ lô ${lot.lotCode}!`);
+    }
+
+    // =========================================================================
+    // 6. BM04: INVOICES & PRINTABLE RECEIPT
+    // =========================================================================
+    function renderInvoicesScreen() {
+      const query = document.getElementById('invSearchInput').value.trim().toLowerCase();
+      const filtered = state.invoices.filter(inv =>
+        inv.invoiceId.toLowerCase().includes(query) ||
+        inv.orderId.toLowerCase().includes(query) ||
+        inv.customerPhone.includes(query) ||
+        inv.customerName.toLowerCase().includes(query)
+      );
+
+      const container = document.getElementById('invoiceListContainer');
+      container.innerHTML = filtered.map(inv => {
+        const active = inv.invoiceId === state.selectedInvoiceId;
+        return `
+          <button type="button" onclick="selectInvoice('${inv.invoiceId}')" class="w-full text-left p-3 rounded-xl border transition ${active ? 'border-matcha-600 bg-matcha-50/70' : 'border-slate-200 bg-white hover:bg-slate-50'}">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-xs font-bold text-slate-800">${inv.invoiceId}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${inv.paid ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">
+                ${inv.paid ? 'Đã thanh toán' : 'Chưa thu COD'}
+              </span>
+            </div>
+            <div class="text-xs font-semibold text-slate-700 mt-1">${inv.customerName} ${inv.customerPhone ? `(${inv.customerPhone})` : ''}</div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 mt-1">
+              <span>${inv.date} · ${inv.paymentMethod}</span>
+              <span class="font-extrabold text-matcha-700">${fmt(inv.total)}</span>
+            </div>
+          </button>
+        `;
+      }).join('');
+
+      const inv = state.invoices.find(i => i.invoiceId === state.selectedInvoiceId) || filtered[0];
+      if (!inv) return;
+
+      const bInfo = BRANCHES[inv.branch] || BRANCHES.CN_BH;
+      document.getElementById('invStoreTitle').textContent = bInfo.title;
+      document.getElementById('invStoreAddress').textContent = bInfo.address;
+      document.getElementById('invDetailId').textContent = inv.invoiceId;
+      document.getElementById('invDetailDate').textContent = inv.date;
+      document.getElementById('invDetailOrderId').textContent = inv.orderId;
+      document.getElementById('invDetailChannel').textContent = `${inv.channel} · ${inv.orderType === 'delivery' ? 'Giao hàng' : 'Tại quầy'}`;
+      document.getElementById('invDetailCustomer').textContent = `${inv.customerName}${inv.customerPhone ? ` (${inv.customerPhone})` : ''}`;
+
+      const statusBadge = document.getElementById('invDetailPayStatus');
+      statusBadge.textContent = `${inv.paymentMethod} · ${inv.paid ? 'Đã thanh toán' : 'Chưa thanh toán'}`;
+      statusBadge.className = inv.paid
+        ? 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700'
+        : 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800';
+
+      const delivRow = document.getElementById('invDetailDeliveryRow');
+      if (inv.deliveryInfo) {
+        delivRow.textContent = `🚚 Giao đến: ${inv.deliveryInfo}`;
+        delivRow.classList.remove('hidden');
+      } else {
+        delivRow.classList.add('hidden');
+      }
+
+      document.getElementById('invDetailItemsBody').innerHTML = inv.items.map(it => `
+        <tr>
+          <td class="py-2 px-2">
+            <div class="font-semibold text-slate-800">${it.name}</div>
+            <div class="text-[11px] text-slate-500">${it.toppings}</div>
+          </td>
+          <td class="py-2 px-2 text-center font-bold">${it.qty}</td>
+          <td class="py-2 px-2 text-right">${fmt(it.unitPrice)}</td>
+          <td class="py-2 px-2 text-right font-bold text-slate-800">${fmt(it.qty * it.unitPrice)}</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('invDetailSub').textContent = fmt(inv.subtotal);
+      document.getElementById('invDetailCoupon').textContent = `-${fmt(inv.couponDiscount)}`;
+      document.getElementById('invDetailPoints').textContent = `-${fmt(inv.pointDiscount)}`;
+      document.getElementById('invDetailShip').textContent = fmt(inv.shippingFee);
+      document.getElementById('invDetailTotal').textContent = fmt(inv.total);
+
+      const codBtn = document.getElementById('btnConfirmCodPaid');
+      codBtn.classList.toggle('hidden', inv.paid);
+    }
+
+    function selectInvoice(id) {
+      state.selectedInvoiceId = id;
+      renderInvoicesScreen();
+    }
+
+    // =========================================================================
+    // 7. BM05: REVENUE REPORT & ANALYTICS
+    // =========================================================================
+    function renderReportScreen() {
+      const period = document.getElementById('repPeriodFilter').value;
+      const branchFilter = document.getElementById('repBranchFilter').value;
+
+      // Baseline historical data for month vs today
+      const baseScale = period === 'month' ? 1 : 0.08;
+      const branchScale = branchFilter === 'ALL' ? 1 : (branchFilter === 'CN_BH' ? 0.5 : 0.25);
+
+      const matchingNewInvoices = state.invoices.filter(inv =>
+        (branchFilter === 'ALL' || inv.branch === branchFilter) &&
+        (period === 'month' || inv.isToday)
+      );
+
+      const liveOrdersCount = matchingNewInvoices.length;
+      const liveGross = matchingNewInvoices.reduce((s, i) => s + i.subtotal + i.shippingFee, 0);
+      const liveDiscount = matchingNewInvoices.reduce((s, i) => s + i.couponDiscount + i.pointDiscount, 0);
+      const liveNet = matchingNewInvoices.reduce((s, i) => s + i.total, 0);
+
+      const totalOrders = Math.round(1238 * baseScale * branchScale) + liveOrdersCount;
+      const canceledOrders = Math.round(18 * baseScale * branchScale);
+      const grossRev = Math.round(54592000 * baseScale * branchScale) + liveGross;
+      const discountRev = Math.round(4127200 * baseScale * branchScale) + liveDiscount;
+      const netRev = Math.round(50464800 * baseScale * branchScale) + liveNet;
+
+      document.getElementById('kpiTotalOrders').textContent = totalOrders.toLocaleString('vi-VN');
+      document.getElementById('kpiCanceledOrders').textContent = `/ ${canceledOrders} hủy`;
+      document.getElementById('kpiGrossRev').textContent = fmt(grossRev);
+      document.getElementById('kpiDiscountRev').textContent = `-${fmt(discountRev)}`;
+      document.getElementById('kpiNetRev').textContent = fmt(netRev);
+
+      // Bar chart
+      const days = [
+        { label: 'Thứ 2', val: 6.2 },
+        { label: 'Thứ 3', val: 7.4 },
+        { label: 'Thứ 4', val: 6.9 },
+        { label: 'Thứ 5', val: 8.5 },
+        { label: 'Thứ 6', val: 9.8 },
+        { label: 'Thứ 7', val: 11.8 }
+      ];
+      const maxVal = 13;
+      document.getElementById('revenueBarChart').innerHTML = days.map(d => {
+        const scaled = Number((d.val * branchScale).toFixed(1));
+        const pct = Math.min(100, Math.round((d.val / maxVal) * 100));
+        return `
+          <div class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+            <span class="text-[11px] font-bold text-matcha-700">${scaled}tr</span>
+            <div class="w-full max-w-[38px] rounded-t-lg bg-gradient-to-t from-matcha-600 to-matcha-500 transition-all duration-300" style="height:${pct}%"></div>
+            <span class="text-[11px] font-semibold text-slate-500">${d.label}</span>
+          </div>
+        `;
+      }).join('');
+
+      // Top 5 products
+      const top5 = [...PRODUCTS]
+        .map(p => {
+          const sold = Math.max(1, Math.round(p.soldBase * baseScale * branchScale));
+          return { ...p, sold, rev: sold * p.price };
+        })
+        .sort((a, b) => b.sold - a.sold)
+        .slice(0, 5);
+
+      document.getElementById('topProductsBody').innerHTML = top5.map((p, idx) => `
+        <tr>
+          <td class="py-2.5 px-2.5 font-extrabold text-matcha-700">${idx + 1}</td>
+          <td class="py-2.5 px-2.5 font-semibold text-slate-800">${p.name}</td>
+          <td class="py-2.5 px-2.5 text-right font-bold">${p.sold} ly</td>
+          <td class="py-2.5 px-2.5 text-right font-bold text-matcha-700">${fmt(p.rev)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function exportReportCsv() {
+      const rows = [
+        ['Chi nhanh', 'Ky bao cao', 'Tong don', 'Don huy', 'Doanh thu gop', 'Giam gia', 'Doanh thu thuc te'],
+        [
+          BRANCHES[document.getElementById('repBranchFilter').value]?.name || 'Toan he thong',
+          document.getElementById('repPeriodFilter').selectedOptions[0].text,
+          document.getElementById('kpiTotalOrders').textContent,
+          document.getElementById('kpiCanceledOrders').textContent,
+          document.getElementById('kpiGrossRev').textContent,
+          document.getElementById('kpiDiscountRev').textContent,
+          document.getElementById('kpiNetRev').textContent
+        ]
+      ];
+      const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + rows.map(e => e.join(',')).join('\n');
+      const link = document.createElement('a');
+      link.setAttribute('href', encodeURI(csvContent));
+      link.setAttribute('download', 'BaoCaoDoanhThu_MayXanh_2026.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      showToast('Đã xuất file báo cáo doanh thu CSV!');
+    }
+
+    // =========================================================================
+    // 8. EVENT LISTENERS & INITIALIZATION
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      // Mobile menu
+      document.getElementById('btnMobileMenu').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      });
+
+      // Sidebar navigation
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', () => switchScreen(btn.dataset.nav));
+      });
+
+      // Branch change
+      document.getElementById('branchSelect').addEventListener('change', e => {
+        state.branch = e.target.value;
+        showToast(`Đã chuyển sang ${BRANCHES[state.branch].name}`);
+        if (state.activeScreen === 'bm02') renderStockInTable();
+        if (state.activeScreen === 'bm03') renderStockOutScreen();
+      });
+
+      // Role change
+      document.getElementById('roleSelect').addEventListener('change', e => {
+        state.role = e.target.value;
+        applyRolePermissions();
+        showToast(`Đã chuyển vai trò: ${ROLES[state.role].title}`);
+      });
+
+      // POS filters
+      document.getElementById('posSearchInput').addEventListener('input', renderPosProducts);
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.cat-btn').forEach(b => {
+            b.className = 'cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap';
+          });
+          btn.className = 'cat-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-matcha-600 text-white whitespace-nowrap';
+          renderPosProducts();
+        });
+      });
+
+      // Modal events
+      document.getElementById('btnCloseProdModal').addEventListener('click', () => {
+        document.getElementById('productModal').classList.add('hidden');
+        document.getElementById('productModal').classList.remove('flex');
+      });
+
+      document.querySelectorAll('.size-opt-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          modalState.size = btn.dataset.size;
+          modalState.sizeAdd = Number(btn.dataset.add);
+          document.querySelectorAll('.size-opt-btn').forEach(b => {
+            const active = b === btn;
+            b.className = active
+              ? 'size-opt-btn py-2 px-3 rounded-xl border-2 border-matcha-600 bg-matcha-50 text-matcha-800 text-xs font-bold'
+              : 'size-opt-btn py-2 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 text-xs font-semibold';
+          });
+          updateModalCalcPrice();
+        });
+      });
+
+      document.getElementById('btnModalQtyMinus').addEventListener('click', () => {
+        if (modalState.qty > 1) modalState.qty--;
+        document.getElementById('modalQtyVal').textContent = modalState.qty;
+        updateModalCalcPrice();
+      });
+      document.getElementById('btnModalQtyPlus').addEventListener('click', () => {
+        modalState.qty++;
+        document.getElementById('modalQtyVal').textContent = modalState.qty;
+        updateModalCalcPrice();
+      });
+      document.getElementById('btnConfirmAddCart').addEventListener('click', addConfiguredProductToCart);
+
+      // POS Customer lookup
+      document.getElementById('btnFindCustomer').addEventListener('click', () => {
+        const phone = document.getElementById('posCustomerPhone').value.trim();
+        const cust = CUSTOMERS[phone];
+        if (cust) {
+          state.selectedCustomer = cust;
+          document.getElementById('customerPointsBadge').textContent = `${cust.name} (${cust.points} điểm)`;
+          showToast(`Đã liên kết khách hàng ${cust.name} (${cust.points} điểm)`);
+        } else {
+          state.selectedCustomer = null;
+          document.getElementById('customerPointsBadge').textContent = 'Khách lẻ (0 điểm)';
+          document.getElementById('posPointsUse').value = '0';
+          showToast('Không tìm thấy SĐT thành viên, áp dụng khách lẻ.', 'warning');
+        }
+        renderCartAndTotals();
+      });
+
+      // Order type toggle (Counter vs Delivery)
+      document.getElementById('posOrderType').addEventListener('change', e => {
+        const isDelivery = e.target.value === 'delivery';
+        document.getElementById('deliveryFieldsBox').classList.toggle('hidden', !isDelivery);
+        renderCartAndTotals();
+      });
+      document.getElementById('delivDistance').addEventListener('input', renderCartAndTotals);
+
+      // Coupon & Points
+      document.getElementById('btnApplyCoupon').addEventListener('click', () => {
+        const code = document.getElementById('posCouponInput').value.trim().toUpperCase();
+        if (!code) {
+          state.appliedCoupon = null;
+          renderCartAndTotals();
+          return;
+        }
+        const cp = COUPONS[code];
+        if (!cp) {
+          showToast('Mã giảm giá không tồn tại hoặc đã hết hạn!', 'error');
+          return;
+        }
+        state.appliedCoupon = cp;
+        renderCartAndTotals();
+        showToast(`Đã áp dụng mã ${cp.code} (${cp.label})`);
+      });
+      document.getElementById('posPointsUse').addEventListener('input', renderCartAndTotals);
+
+      // Payment method buttons
+      document.querySelectorAll('.pay-method-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.paymentMethod = btn.dataset.pay;
+          document.querySelectorAll('.pay-method-btn').forEach(b => {
+            const active = b === btn;
+            b.className = active
+              ? 'pay-method-btn py-1.5 px-2 rounded-xl text-xs font-bold border-2 border-matcha-600 bg-matcha-50 text-matcha-800'
+              : 'pay-method-btn py-1.5 px-2 rounded-xl text-xs font-semibold border border-slate-200 bg-white text-slate-600';
+          });
+          document.getElementById('transferConfirmWrap').classList.toggle('hidden', state.paymentMethod !== 'Chuyển khoản');
+        });
+      });
+
+      // Clear / Save Order
+      document.getElementById('btnClearCart').addEventListener('click', () => {
+        state.cart = [];
+        renderCartAndTotals();
+      });
+      document.getElementById('btnCancelOrderDraft').addEventListener('click', () => {
+        state.cart = [];
+        state.appliedCoupon = null;
+        document.getElementById('posCouponInput').value = '';
+        document.getElementById('posPointsUse').value = '0';
+        renderCartAndTotals();
+        showToast('Đã hủy nháp đơn hàng hiện tại.', 'warning');
+      });
+      document.getElementById('btnSaveAndBrew').addEventListener('click', handleSaveAndBrew);
+
+      // BM02 Stock In events
+      document.getElementById('btnAddInRow').addEventListener('click', () => {
+        state.inDraftRows.push({ matId: 'NL03', qty: 10, unitPrice: 32000, lotCode: `LOT-2611X`, expiry: '2027-03-01' });
+        renderStockInTable();
+      });
+      document.getElementById('btnConfirmStockIn').addEventListener('click', confirmStockIn);
+
+      // BM03 Stock Out events
+      document.getElementById('btnConfirmStockOut').addEventListener('click', confirmStockOut);
+
+      // BM04 Invoice events
+      document.getElementById('invSearchInput').addEventListener('input', renderInvoicesScreen);
+      document.getElementById('btnConfirmCodPaid').addEventListener('click', () => {
+        const inv = state.invoices.find(i => i.invoiceId === state.selectedInvoiceId);
+        if (inv) {
+          inv.paid = true;
+          renderInvoicesScreen();
+          showToast(`Đã xác nhận thu tiền COD cho hóa đơn ${inv.invoiceId}!`);
+        }
+      });
+      document.getElementById('btnPrintInvoice').addEventListener('click', () => window.print());
+
+      // BM05 Report events
+      document.getElementById('repPeriodFilter').addEventListener('change', renderReportScreen);
+      document.getElementById('repBranchFilter').addEventListener('change', renderReportScreen);
+      document.getElementById('btnExportCsv').addEventListener('click', exportReportCsv);
+
+      // Init default screen
+      applyRolePermissions();
+      renderPosProducts();
+      renderCartAndTotals();
+    });
+  </script>
+</body>
+</html>

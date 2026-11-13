@@ -1,0 +1,553 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>2.6. Thiết kế giao diện — Hệ thống quản lý bán hàng và đơn hàng cửa hàng trà sữa Mây Xanh</title>
+<script>try{var t=localStorage.getItem('tk-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&family=Itim&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}:root{--paper:#fbfbf9;--card:#fff;--wash:#f1f5f9;--ink:#22303f;--muted:#5b6b7c;--line:#22303f;--line-soft:#c7d2de;--blue:#1d4ed8;--red:#dc2626;--green:#047857;--orange:#c2410c;--purple:#7c3aed;--hi:rgba(250,204,21,.55);--ink-2:#3c4c5e;--ink-rgb:34,48,63;--glow:#fff;--t-blue:#dbeafe;--t-red:#fee2e2;--t-purple:#ede9fe;--t-green:#ecfdf5;--t-orange:#fff7ed;--t-yellow:#fef3c7;--shadow:3px 4px 0 rgba(var(--ink-rgb),.1);--shadow-lg:5px 7px 0 rgba(var(--ink-rgb),.12);--read:'Be Vietnam Pro',system-ui,sans-serif;--hand:'Itim','Be Vietnam Pro',cursive;--mono:'JetBrains Mono',Consolas,monospace}
+:root[data-theme=dark]{--paper:#10161d;--glow:#1b2634;--card:#18202a;--wash:#202b39;--ink:#e8eef5;--ink-2:#b7c4d3;--muted:#98a7b9;--ink-rgb:148,163,184;--line:#5f7186;--line-soft:#38485a;--blue:#60a5fa;--red:#f87171;--green:#34d399;--orange:#fb923c;--purple:#a78bfa;--hi:rgba(251,191,36,.38);--t-blue:#17304f;--t-red:#3f1a1a;--t-purple:#2b2450;--t-green:#0d352c;--t-orange:#3f2410;--t-yellow:#443810}
+::selection{background:var(--hi)}:focus-visible{outline:3px solid var(--purple);outline-offset:3px;border-radius:6px}html{scroll-behavior:smooth}
+body{font-family:var(--read);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:-2;background:radial-gradient(circle at 50% 0%,var(--glow),transparent 60%),var(--paper)}
+body::after{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:radial-gradient(rgba(var(--ink-rgb),.1) 1.2px,transparent 1.2px);background-size:26px 26px}
+.article{max-width:1000px;margin:0 auto;padding:clamp(20px,4vh,50px) clamp(18px,4vw,50px) 100px}
+.hero{margin-bottom:clamp(30px,5vh,56px);padding-bottom:26px;border-bottom:3px solid var(--line)}
+.chapter-tag{font-family:var(--hand);font-size:1.1rem;color:var(--card);background:var(--purple);display:inline-block;padding:.35em 1.05em;border-radius:12px 4px 13px 5px;rotate:-1deg;margin-bottom:16px}
+.hero h1{font-size:clamp(2rem,4.6vw,3.4rem);font-weight:800;line-height:1.12;letter-spacing:-.03em;margin-bottom:.35em;text-wrap:balance}.grad{color:var(--purple);background:linear-gradient(transparent 62%,var(--hi) 62%)}
+.hero-sub{font-size:1.15rem;color:var(--muted);line-height:1.6;max-width:74ch}
+section{margin-bottom:clamp(34px,5vh,56px)}h2{font-size:clamp(1.4rem,2.4vw,1.95rem);font-weight:800;letter-spacing:-.02em;margin-bottom:.6em;line-height:1.25}h2 .num{color:var(--purple);font-family:var(--hand);margin-right:.3em}
+h3{font-size:1.2rem;font-weight:700;margin:1.3em 0 .45em}p{font-size:1.02rem;line-height:1.7;color:var(--ink-2);margin-bottom:.8em;max-width:78ch}p strong,li strong{color:var(--ink)}
+code{font-family:var(--mono);font-size:.9em;background:var(--wash);color:var(--purple);padding:.12em .45em;border-radius:4px}ul{margin:.5em 0 1em 1.5em;max-width:78ch}li{font-size:1.02rem;line-height:1.7;color:var(--ink-2);margin-bottom:.3em}li::marker{color:var(--purple)}
+.def-box{border:2.5px solid var(--purple);background:var(--t-purple);padding:14px 20px;border-radius:8px 16px 8px 16px;margin:1em 0}.def-box .label{font-family:var(--hand);font-size:1.1rem;font-weight:700;color:var(--purple);margin-bottom:.3em}.def-box p{font-size:.97rem;color:var(--ink);margin:0}
+.def-box.amber{border-color:var(--orange);background:var(--t-orange)}.def-box.amber .label{color:var(--orange)}.def-box.green{border-color:var(--green);background:var(--t-green)}.def-box.green .label{color:var(--green)}
+.diagram-wrap{position:relative;background:var(--card);border:2px solid var(--line);border-radius:14px 5px 15px 6px;padding:14px;box-shadow:var(--shadow);cursor:zoom-in;transition:.25s;margin:1.2em 0 .3em;user-select:none}.diagram-wrap:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:var(--shadow-lg)}.diagram-wrap svg{width:100%;height:auto;display:block}
+.zoom-badge{position:absolute;bottom:10px;right:10px;font-family:var(--hand);font-size:13px;padding:5px 11px;background:var(--purple);color:#fff;border-radius:10px 4px 10px 4px;opacity:.85;pointer-events:none}
+.diagram-caption{font-family:var(--hand);font-size:.95rem;color:var(--muted);text-align:center;margin:.4em 0 1.4em}
+.tw{overflow-x:auto;margin:1em 0}.cmp-table{width:100%;min-width:620px;border-collapse:separate;border-spacing:0;font-size:.88rem;background:var(--card);border:2px solid var(--line);border-radius:8px 14px 8px 14px;overflow:hidden;box-shadow:var(--shadow)}
+.cmp-table th{text-align:left;padding:9px 12px;background:var(--t-purple);font-family:var(--hand);font-size:1rem;border-bottom:2px solid var(--line)}.cmp-table td{padding:8px 12px;border-bottom:1px solid var(--line-soft);color:var(--ink-2);line-height:1.45;vertical-align:top}.cmp-table tr:last-child td{border:none}.cmp-table tr:hover td{background:var(--wash)}.cmp-table td:first-child{font-weight:700;color:var(--ink)}.cmp-table td i{color:var(--blue)}.cmp-table td u{text-decoration-color:var(--purple);text-underline-offset:3px;font-weight:600;color:var(--ink)}
+.modal{position:fixed;inset:0;z-index:500;background:rgba(10,15,22,.82);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;visibility:hidden;transition:.25s}.modal.open{opacity:1;visibility:visible}
+.mc{background:var(--card);border:3px solid var(--line);border-radius:18px 8px 20px 10px;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden}
+.bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--wash);border-bottom:2px solid var(--line);flex-wrap:wrap}.grp{display:flex;gap:3px;padding:3px;background:var(--card);border:1.5px solid var(--line-soft);border-radius:9px}
+.tb{padding:6px 12px;font-family:var(--hand);font-size:14px;background:transparent;border:none;border-radius:6px;cursor:pointer;color:var(--ink)}.tb:hover{background:var(--t-purple);color:var(--purple)}.tb.active{background:var(--purple);color:#fff}
+.cb{width:26px;height:26px;border-radius:50%;background:var(--c);border:2px solid transparent;cursor:pointer}.cb.active{border-color:var(--ink);box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ink)}
+.sb{min-width:32px;height:30px;border:none;border-radius:6px;background:transparent;cursor:pointer;color:var(--ink);font-family:var(--mono);font-weight:700}.sb.active{background:var(--purple);color:#fff}.sp{flex:1}
+.ca{position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:18px;background:var(--paper);overflow:hidden;touch-action:none}.ca svg{max-width:100%;max-height:100%;width:100%;height:100%;pointer-events:none}.ca canvas{position:absolute;touch-action:none;cursor:crosshair}</style></head><body><main class="article">
+<header class="hero"><div class="chapter-tag">Phần 2.6 · Phân tích &amp; Thiết kế Hệ thống Thông tin</div><h1>Thiết kế giao diện hệ thống <span class="grad">Trà Sữa Mây Xanh</span></h1><p class="hero-sub">Đặc tả đầy đủ mục tiêu, nguyên tắc thiết kế, 5 màn hình nghiệp vụ trọng tâm (<code>BM01</code> – <code>BM05</code>) trên nền tảng ASP.NET Core MVC kết nối cơ sở dữ liệu tập trung <code>MayXanhDB</code> và ma trận phân quyền người dùng. Nhấn vào bất kỳ khung giao diện nào để phóng to và vẽ ghi chú; nhấn phím <code>D</code> để đổi giao diện sáng/tối.</p></header>
+
+<section><h2><span class="num">2.6.1.</span> Mục tiêu thiết kế giao diện</h2>
+<p>Giao diện người dùng là thành phần giúp nhân viên và quản lý tương tác với hệ thống quản lý bán hàng và đơn hàng cửa hàng trà sữa <strong>Mây Xanh</strong>. Giao diện được thiết kế nhằm hỗ trợ các nghiệp vụ chính như tiếp nhận đơn hàng, thanh toán, quản lý nguyên liệu, lập hóa đơn và theo dõi tình hình kinh doanh.</p>
+<p><strong>Các mục tiêu thiết kế giao diện gồm:</strong></p>
+<ul>
+<li>Bố cục rõ ràng, dễ quan sát và thuận tiện cho từng nhóm người dùng.</li>
+<li>Sắp xếp chức năng theo nhóm nghiệp vụ, hạn chế thao tác dư thừa.</li>
+<li>Kiểm tra dữ liệu đầu vào và điều kiện nghiệp vụ trước khi lưu.</li>
+<li>Hiển thị rõ trạng thái đơn hàng, tình trạng thanh toán và số lượng nguyên liệu tồn kho.</li>
+<li>Hạn chế sai sót trong quá trình tiếp nhận đơn, nhập kho, xuất kho và lập hóa đơn.</li>
+<li>Hiển thị chức năng phù hợp với vai trò và quyền hạn của tài khoản đăng nhập.</li>
+<li>Sử dụng dữ liệu tập trung từ cơ sở dữ liệu <code>MayXanhDB</code>, bảo đảm tính thống nhất giữa các nghiệp vụ.</li>
+</ul>
+<div class="def-box"><div class="label">Định hướng công nghệ triển khai</div><p>Hệ thống được định hướng xây dựng dưới dạng ứng dụng web bằng <strong>ASP.NET Core MVC</strong>. Nhân viên và quản lý sử dụng tài khoản được cấp để đăng nhập vào hệ thống. Sau khi đăng nhập, hệ thống hiển thị giao diện và chức năng tương ứng với quyền được phân công.</p></div>
+</section>
+
+<section><h2><span class="num">2.6.2.</span> Nguyên tắc thiết kế giao diện</h2>
+<p>Giao diện được xây dựng dựa trên 6 nguyên tắc cốt lõi sau:</p>
+<div class="tw"><table class="cmp-table"><thead><tr><th style="width:24%">Nguyên tắc</th><th style="width:76%">Nội dung áp dụng</th></tr></thead><tbody>
+<tr><td>Thống nhất</td><td>Các màn hình sử dụng chung màu sắc, kiểu chữ, thanh điều hướng, nút chức năng và cách hiển thị thông báo.</td></tr>
+<tr><td>Dễ sử dụng</td><td>Các chức năng thường xuyên sử dụng như tạo đơn hàng, xem đơn hàng, lập phiếu nhập và xuất kho được bố trí dễ tìm.</td></tr>
+<tr><td>Dễ kiểm soát</td><td>Trạng thái đơn hàng, thanh toán, số lượng tồn và hạn sử dụng nguyên liệu được hiển thị rõ ràng.</td></tr>
+<tr><td>Kiểm tra dữ liệu</td><td>Kiểm tra trường bắt buộc, số lượng, giá tiền, ngày tháng và các điều kiện nghiệp vụ trước khi lưu.</td></tr>
+<tr><td>Phân quyền</td><td>Người dùng chỉ được truy cập chức năng phù hợp với vai trò; quản lý có quyền quản trị và xem báo cáo theo <strong>QĐ12</strong>.</td></tr>
+<tr><td>Nhất quán dữ liệu</td><td>Thông tin trên giao diện được lấy từ cơ sở dữ liệu <code>MayXanhDB</code>, tránh sử dụng các nguồn dữ liệu riêng lẻ không đồng bộ.</td></tr>
+</tbody></table></div>
+</section>
+
+<section><h2><span class="num">2.6.3.</span> Màn hình BM01 – Giao diện tạo và quản lý đơn hàng</h2>
+<h3>2.6.3.1. Mục đích</h3>
+<p>Màn hình <code>BM01</code> hỗ trợ nhân viên thu ngân tiếp nhận và tạo đơn hàng cho khách tại quầy, qua điện thoại hoặc từ kênh đặt hàng ứng dụng. Màn hình cho phép lựa chọn sản phẩm, kích cỡ, số lượng, topping, thông tin khách hàng, phương thức thanh toán và theo dõi tổng tiền đơn hàng.</p>
+<p>Đối với đơn giao hàng, màn hình bổ sung thông tin người nhận, địa chỉ và khoảng cách giao hàng để xác định phí vận chuyển theo quy định của cửa hàng.</p>
+
+<h3>2.6.3.2. Người sử dụng</h3>
+<ul><li>Nhân viên thu ngân.</li><li>Quản lý cửa hàng.</li></ul>
+
+<h3>2.6.3.3. Thành phần giao diện</h3>
+<div class="tw"><table class="cmp-table"><thead><tr><th style="width:8%">STT</th><th style="width:28%">Thành phần</th><th style="width:64%">Mô tả</th></tr></thead><tbody>
+<tr><td>1</td><td>Mã đơn hàng</td><td>Tự động tạo theo định dạng <code>DH-YYYYMMDD-XXXX</code>.</td></tr>
+<tr><td>2</td><td>Ngày tạo</td><td>Hiển thị ngày và thời điểm tạo đơn.</td></tr>
+<tr><td>3</td><td>Chi nhánh</td><td>Chọn chi nhánh tiếp nhận đơn hàng.</td></tr>
+<tr><td>4</td><td>Kênh đặt hàng</td><td>Chọn tại quầy, điện thoại hoặc ứng dụng.</td></tr>
+<tr><td>5</td><td>Loại đơn</td><td>Chọn đơn tại quầy hoặc đơn giao hàng.</td></tr>
+<tr><td>6</td><td>Khách hàng</td><td>Tìm kiếm hoặc nhập thông tin khách hàng; có thể để trống đối với khách mua trực tiếp không cung cấp thông tin.</td></tr>
+<tr><td>7</td><td>Thông tin giao hàng</td><td>Nhập người nhận, số điện thoại và địa chỉ khi chọn giao hàng.</td></tr>
+<tr><td>8</td><td>Sản phẩm</td><td>Tìm kiếm và lựa chọn sản phẩm, kích cỡ.</td></tr>
+<tr><td>9</td><td>Số lượng</td><td>Nhập số lượng sản phẩm, phải lớn hơn 0.</td></tr>
+<tr><td>10</td><td>Topping</td><td>Lựa chọn topping và hiển thị phần tiền cộng thêm.</td></tr>
+<tr><td>11</td><td>Mã giảm giá</td><td>Nhập mã khuyến mãi để hệ thống kiểm tra điều kiện áp dụng.</td></tr>
+<tr><td>12</td><td>Điểm tích lũy</td><td>Hiển thị điểm hiện có và số điểm khách muốn sử dụng.</td></tr>
+<tr><td>13</td><td>Phương thức thanh toán</td><td>Chọn tiền mặt, chuyển khoản hoặc COD tùy loại đơn.</td></tr>
+<tr><td>14</td><td>Phí giao hàng</td><td>Tự động tính theo <strong>QĐ06</strong> đối với đơn giao hàng.</td></tr>
+<tr><td>15</td><td>Giảm giá</td><td>Hiển thị khoản giảm từ coupon và điểm sử dụng.</td></tr>
+<tr><td>16</td><td>Tổng tiền</td><td>Tự động tính số tiền của đơn hàng theo các khoản hợp lệ.</td></tr>
+<tr><td>17</td><td>Ghi chú</td><td>Ghi nhận yêu cầu bổ sung của khách hàng.</td></tr>
+<tr><td>18</td><td>Nút chức năng</td><td>Thêm hoặc xóa sản phẩm, lưu đơn, xác nhận thông tin thanh toán và hủy đơn theo quyền hạn.</td></tr>
+</tbody></table></div>
+
+<h3>2.6.3.4. Mô tả hoạt động</h3>
+<p>Nhân viên thu ngân mở màn hình <code>BM01</code>, chọn chi nhánh, kênh đặt hàng và loại đơn. Hệ thống tạo mã đơn hàng theo định dạng quy định và ghi nhận thời điểm tạo. Nhân viên tìm kiếm sản phẩm, chọn kích cỡ, nhập số lượng và thêm topping theo yêu cầu. Nếu khách hàng đã có thông tin trong hệ thống, nhân viên có thể tìm kiếm bằng số điện thoại để liên kết với đơn hàng.</p>
+<p>Sau khi lựa chọn sản phẩm, hệ thống tính thành tiền từng dòng và tổng tiền hàng. Nếu khách sử dụng mã giảm giá, hệ thống kiểm tra mã có tồn tại, còn hiệu lực và đáp ứng điều kiện áp dụng hay không. Mỗi đơn chỉ được sử dụng một mã giảm giá. Đối với khách hàng sử dụng điểm tích lũy, hệ thống kiểm tra số điểm hiện có và giới hạn quy đổi theo <strong>QĐ08</strong> (số tiền giảm từ điểm không được vượt quá 50% giá trị đơn hàng).</p>
+<p>Đối với đơn giao hàng, nhân viên nhập thông tin người nhận, địa chỉ và khoảng cách giao hàng. Hệ thống tính phí theo <strong>QĐ06</strong>: miễn phí nếu khoảng cách không quá 3 km hoặc giá trị đơn hàng đạt từ 150.000 đồng; các trường hợp còn lại áp dụng phí 15.000 đồng. Sau khi kiểm tra thông tin, nhân viên lưu đơn và ghi nhận phương thức thanh toán: đơn tại quầy phải thanh toán ngay; đơn giao hàng chuyển khoản chỉ chuyển sang trạng thái <em>đang pha chế</em> sau khi xác nhận nhận tiền; đơn COD chỉ ghi nhận đã thanh toán khi nhân viên giao hàng xác nhận đã thu tiền từ khách.</p>
+
+<h3>2.6.3.5. Kiểm tra dữ liệu</h3>
+<ul>
+<li>Đơn hàng phải có ít nhất một dòng sản phẩm; số lượng sản phẩm phải lớn hơn 0.</li>
+<li>Giá bán sản phẩm và giá topping không được là số âm.</li>
+<li>Đơn giao hàng phải có thông tin người nhận và địa chỉ giao hàng; khách mua trực tiếp tại quầy không bắt buộc phải có tài khoản.</li>
+<li>Mã giảm giá phải tồn tại, còn hiệu lực và đáp ứng điều kiện áp dụng; mỗi đơn hàng chỉ được áp dụng một mã giảm giá.</li>
+<li>Số điểm sử dụng không được vượt quá số điểm hiện có và giới hạn quy đổi (tối đa 50% giá trị đơn hàng theo QĐ08).</li>
+<li>Phí giao hàng phải được tính theo QĐ06; tổng tiền phải do hệ thống tính toán, không cho phép người dùng tự nhập tùy ý.</li>
+<li>Đơn chuyển khoản chưa xác nhận nhận tiền không được chuyển sang trạng thái đang pha chế; đơn COD không được tự động ghi nhận đã thanh toán khi mới tạo đơn.</li>
+<li>Không cho phép lưu đơn hàng có dữ liệu không hợp lệ.</li>
+</ul>
+
+<div class="diagram-wrap" data-diagram role="button" tabindex="0" aria-label="Hình 2.8 — Giao diện tạo và quản lý đơn hàng (BM01)"><svg viewBox="0 0 760 390" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="760" height="390" rx="10" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/>
+<rect x="0" y="0" width="760" height="36" rx="10" fill="var(--wash)" stroke="var(--line)" stroke-width="1.5"/>
+<text x="14" y="23" font-size="13" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Mây Xanh · Quản lý Trà Sữa</text>
+<text x="746" y="23" font-size="11" text-anchor="end" fill="var(--ink-2)" font-family="Be Vietnam Pro">Lê Minh Anh (Thu ngân · CN Biên Hòa) ▾</text>
+<rect x="0" y="36" width="150" height="354" fill="var(--wash)" stroke="var(--line)" stroke-width="1.5"/>
+<rect x="8" y="50" width="134" height="26" rx="6" fill="var(--purple)" stroke="var(--purple)" stroke-width="1.5"/>
+<text x="18" y="68" font-size="11.5" fill="#fff" font-family="Be Vietnam Pro" font-weight="700">Bán hàng (BM01)</text>
+<text x="18" y="98" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Nhập kho (BM02)</text>
+<text x="18" y="128" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Xuất kho (BM03)</text>
+<text x="18" y="158" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Hóa đơn (BM04)</text>
+<text x="18" y="188" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Báo cáo (BM05)</text>
+<text x="170" y="64" font-size="14" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Tạo và quản lý đơn hàng (BM01)</text>
+<text x="170" y="88" font-size="10" fill="var(--muted)" font-family="Be Vietnam Pro">Mã đơn hàng</text>
+<rect x="170" y="93" width="180" height="24" rx="3" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="178" y="109" font-size="10.5" fill="var(--ink)" font-family="JetBrains Mono">DH-20261112-0042</text>
+<text x="365" y="88" font-size="10" fill="var(--muted)" font-family="Be Vietnam Pro">Kênh / Loại đơn</text>
+<rect x="365" y="93" width="180" height="24" rx="3" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="373" y="109" font-size="10.5" fill="var(--ink)" font-family="Be Vietnam Pro">Ứng dụng · Giao hàng ▾</text>
+<text x="560" y="88" font-size="10" fill="var(--muted)" font-family="Be Vietnam Pro">Khách hàng / SĐT</text>
+<rect x="560" y="93" width="180" height="24" rx="3" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="568" y="109" font-size="10.5" fill="var(--ink)" font-family="Be Vietnam Pro">0901234567 (420 điểm)</text>
+<text x="170" y="133" font-size="10" fill="var(--muted)" font-family="Be Vietnam Pro">Thông tin giao hàng (Người nhận · Địa chỉ · Khoảng cách)</text>
+<rect x="170" y="138" width="570" height="24" rx="3" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="178" y="154" font-size="10.5" fill="var(--ink)" font-family="Be Vietnam Pro">Nguyễn Thảo Vy · 128 Nguyễn Ái Quốc, Biên Hòa · 2.4 km (Miễn phí ship QĐ06)</text>
+<rect x="170" y="174" width="570" height="24" fill="var(--t-purple)" stroke="var(--line)" stroke-width="1.5"/>
+<text x="176" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">STT</text>
+<text x="210" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Sản phẩm &amp; Kích cỡ</text>
+<text x="380" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Topping</text>
+<text x="525" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">SL</text>
+<text x="575" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Đơn giá</text>
+<text x="660" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Thành tiền</text>
+<rect x="170" y="198" width="570" height="24" fill="none" stroke="var(--line-soft)" stroke-width="1"/>
+<text x="176" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">1</text>
+<text x="210" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Trà Sữa Mây Xanh (Size L)</text>
+<text x="380" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Trân châu đen (+7k)</text>
+<text x="525" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">2</text>
+<text x="575" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">42.000</text>
+<text x="660" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">84.000</text>
+<rect x="170" y="222" width="570" height="24" fill="none" stroke="var(--line-soft)" stroke-width="1"/>
+<text x="176" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">2</text>
+<text x="210" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Trà Ô Long Kem Cheese (M)</text>
+<text x="380" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Thạch dừa (+6k)</text>
+<text x="525" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">1</text>
+<text x="575" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">44.000</text>
+<text x="660" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">44.000</text>
+<rect x="170" y="246" width="570" height="24" fill="none" stroke="var(--line-soft)" stroke-width="1"/>
+<text x="176" y="262" font-size="10" fill="var(--red)" font-family="Be Vietnam Pro">+ Thêm sản phẩm</text>
+<text x="170" y="290" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Mã giảm giá: <tspan font-weight="700" fill="var(--purple)">MAYXANH10</tspan> (-12.800đ) · Điểm dùng: <tspan font-weight="700">100đ</tspan> (-10.000đ) · Ship: <tspan font-weight="700" fill="var(--green)">0đ</tspan></text>
+<text x="170" y="310" font-size="10.5" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Tổng thanh toán: 105.200 đ · Thanh toán: Chuyển khoản (Đã xác nhận nhận tiền)</text>
+<text x="170" y="328" font-size="10" fill="var(--orange)" font-family="Be Vietnam Pro" font-style="italic">Quy tắc: Mỗi đơn 1 coupon; điểm giảm ≤ 50% đơn (QĐ08); đơn CK chỉ pha chế khi xác nhận tiền.</text>
+<rect x="615" y="344" width="125" height="28" rx="6" fill="var(--purple)" stroke="var(--purple)" stroke-width="1.5"/><text x="677.5" y="362" font-size="10.5" text-anchor="middle" fill="#fff" font-family="Be Vietnam Pro" font-weight="700">Lưu &amp; Pha chế</text>
+<rect x="495" y="344" width="110" height="28" rx="6" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="550" y="362" font-size="10.5" text-anchor="middle" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Xác nhận TT</text>
+<rect x="405" y="344" width="80" height="28" rx="6" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="445" y="362" font-size="10.5" text-anchor="middle" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Hủy đơn</text>
+</svg><span class="zoom-badge">🔍 Nhấn để phóng to &amp; vẽ</span></div>
+<div class="diagram-caption">Hình 2.8. Giao diện tạo và quản lý đơn hàng (BM01).</div>
+</section>
+
+<section><h2><span class="num">2.6.4.</span> Màn hình BM02 – Giao diện lập phiếu nhập kho</h2>
+<h3>2.6.4.1. Mục đích</h3>
+<p>Màn hình <code>BM02</code> được sử dụng để ghi nhận các lần nhập nguyên liệu từ nhà cung cấp vào kho của từng chi nhánh. Màn hình hỗ trợ nhân viên kho quản lý nhà cung cấp, nguyên liệu, số lượng, đơn giá, số lô và hạn sử dụng. Thông tin nhập kho được sử dụng để cập nhật số lượng tồn và theo dõi từng lô nguyên liệu.</p>
+
+<h3>2.6.4.2. Người sử dụng</h3>
+<ul><li>Nhân viên kho.</li><li>Quản lý cửa hàng.</li></ul>
+
+<h3>2.6.4.3. Thành phần giao diện</h3>
+<div class="tw"><table class="cmp-table"><thead><tr><th style="width:8%">STT</th><th style="width:28%">Thành phần</th><th style="width:64%">Mô tả</th></tr></thead><tbody>
+<tr><td>1</td><td>Mã phiếu nhập</td><td>Mã định danh phiếu nhập.</td></tr>
+<tr><td>2</td><td>Chi nhánh</td><td>Chọn chi nhánh thực hiện nhập kho.</td></tr>
+<tr><td>3</td><td>Ngày nhập</td><td>Ghi nhận ngày thực hiện nhập kho.</td></tr>
+<tr><td>4</td><td>Nhà cung cấp</td><td>Chọn nhà cung cấp từ danh sách.</td></tr>
+<tr><td>5</td><td>Nhân viên nhập</td><td>Hiển thị nhân viên đang đăng nhập.</td></tr>
+<tr><td>6</td><td>Nguyên liệu</td><td>Chọn nguyên liệu cần nhập.</td></tr>
+<tr><td>7</td><td>Đơn vị tính</td><td>Hiển thị đơn vị tính của nguyên liệu.</td></tr>
+<tr><td>8</td><td>Số lượng</td><td>Nhập số lượng nguyên liệu thực tế.</td></tr>
+<tr><td>9</td><td>Đơn giá</td><td>Nhập giá nhập của nguyên liệu.</td></tr>
+<tr><td>10</td><td>Số lô</td><td>Nhập mã lô theo thông tin nhà cung cấp.</td></tr>
+<tr><td>11</td><td>Hạn sử dụng</td><td>Nhập ngày hết hạn của lô nguyên liệu.</td></tr>
+<tr><td>12</td><td>Thành tiền</td><td>Tự động tính bằng số lượng nhân đơn giá.</td></tr>
+<tr><td>13</td><td>Tổng tiền</td><td>Hiển thị tổng giá trị phiếu nhập.</td></tr>
+<tr><td>14</td><td>Ghi chú</td><td>Ghi nhận thông tin bổ sung nếu có.</td></tr>
+<tr><td>15</td><td>Nút chức năng</td><td>Thêm dòng nguyên liệu, xóa dòng, lưu và xác nhận phiếu nhập theo quy trình.</td></tr>
+</tbody></table></div>
+
+<h3>2.6.4.4. Mô tả hoạt động</h3>
+<p>Khi nhà cung cấp giao nguyên liệu, nhân viên kho mở màn hình <code>BM02</code> để lập phiếu nhập mới. Nhân viên chọn chi nhánh, nhà cung cấp và nhập thông tin từng nguyên liệu, bao gồm số lượng, đơn giá, số lô và hạn sử dụng. Hệ thống tự động tính thành tiền của từng dòng và tổng giá trị phiếu nhập. Khi phiếu nhập được xác nhận hợp lệ, hệ thống lưu thông tin vào các bảng <code>PhieuNhap</code> và <code>ChiTietNhap</code>, đồng thời ghi nhận lô nguyên liệu tương ứng trong bảng <code>LoNguyenLieu</code>. Số lượng tồn kho của chi nhánh trong bảng <code>TonKhoChiNhanh</code> được cập nhật đồng bộ với số lượng của các lô.</p>
+
+<h3>2.6.4.5. Kiểm tra dữ liệu</h3>
+<ul>
+<li>Phải chọn nhà cung cấp hợp lệ và xác định chi nhánh nhập kho.</li>
+<li>Phiếu nhập phải có ít nhất một dòng nguyên liệu; số lượng nhập phải lớn hơn 0; đơn giá không được là số âm.</li>
+<li>Số lô không được để trống; hạn sử dụng phải được ghi nhận hợp lệ và kiểm tra phù hợp với ngày nhập.</li>
+<li>Không cập nhật tồn kho khi phiếu nhập chưa được xác nhận; chỉ người dùng có quyền phù hợp mới được xác nhận phiếu nhập.</li>
+<li>Không cho phép tự ý sửa thông tin phiếu nhập đã ghi nhận nếu không có nghiệp vụ điều chỉnh hợp lệ.</li>
+</ul>
+
+<div class="diagram-wrap" data-diagram role="button" tabindex="0" aria-label="Hình 2.9 — Giao diện lập phiếu nhập kho (BM02)"><svg viewBox="0 0 760 356" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="760" height="356" rx="10" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/>
+<rect x="0" y="0" width="760" height="36" rx="10" fill="var(--wash)" stroke="var(--line)" stroke-width="1.5"/>
+<text x="14" y="23" font-size="13" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Mây Xanh · Quản lý Trà Sữa</text>
+<text x="746" y="23" font-size="11" text-anchor="end" fill="var(--ink-2)" font-family="Be Vietnam Pro">Trần Quốc Bảo (Thủ kho · CN Biên Hòa) ▾</text>
+<rect x="0" y="36" width="150" height="320" fill="var(--wash)" stroke="var(--line)" stroke-width="1.5"/>
+<text x="18" y="68" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Bán hàng (BM01)</text>
+<rect x="8" y="80" width="134" height="26" rx="6" fill="var(--purple)" stroke="var(--purple)" stroke-width="1.5"/>
+<text x="18" y="98" font-size="11.5" fill="#fff" font-family="Be Vietnam Pro" font-weight="700">Nhập kho (BM02)</text>
+<text x="18" y="128" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Xuất kho (BM03)</text>
+<text x="18" y="158" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Hóa đơn (BM04)</text>
+<text x="18" y="188" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Báo cáo (BM05)</text>
+<text x="170" y="64" font-size="14" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Lập phiếu nhập kho (BM02)</text>
+<text x="170" y="88" font-size="10" fill="var(--muted)" font-family="Be Vietnam Pro">Mã phiếu nhập</text>
+<rect x="170" y="93" width="270" height="24" rx="3" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="178" y="109" font-size="10.5" fill="var(--ink)" font-family="JetBrains Mono">PN-20261112-009</text>
+<text x="460" y="88" font-size="10" fill="var(--muted)" font-family="Be Vietnam Pro">Ngày nhập / Chi nhánh</text>
+<rect x="460" y="93" width="270" height="24" rx="3" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="468" y="109" font-size="10.5" fill="var(--ink)" font-family="Be Vietnam Pro">12/11/2026 · CN Biên Hòa ▾</text>
+<text x="170" y="133" font-size="10" fill="var(--muted)" font-family="Be Vietnam Pro">Nhà cung cấp</text>
+<rect x="170" y="138" width="270" height="24" rx="3" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="178" y="154" font-size="10.5" fill="var(--ink)" font-family="Be Vietnam Pro">Công ty Trà &amp; Nguyên Liệu Lộc Phát ▾</text>
+<text x="460" y="133" font-size="10" fill="var(--muted)" font-family="Be Vietnam Pro">Nhân viên nhập</text>
+<rect x="460" y="138" width="270" height="24" rx="3" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="468" y="154" font-size="10.5" fill="var(--ink)" font-family="Be Vietnam Pro">Trần Quốc Bảo (NV008)</text>
+<rect x="170" y="174" width="570" height="24" fill="var(--t-purple)" stroke="var(--line)" stroke-width="1.5"/>
+<text x="176" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Nguyên liệu</text>
+<text x="310" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">ĐVT</text>
+<text x="350" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">SL</text>
+<text x="390" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Đơn giá</text>
+<text x="465" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Số lô</text>
+<text x="550" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Hạn sử dụng</text>
+<text x="645" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Thành tiền</text>
+<rect x="170" y="198" width="570" height="24" fill="none" stroke="var(--line-soft)" stroke-width="1"/>
+<text x="176" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Hồng trà đặc biệt</text>
+<text x="310" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Kg</text>
+<text x="350" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">20</text>
+<text x="390" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">165.000</text>
+<text x="465" y="214" font-size="10" fill="var(--ink-2)" font-family="JetBrains Mono">LOT-2611A</text>
+<text x="550" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">12/05/2027</text>
+<text x="645" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">3.300.000</text>
+<rect x="170" y="222" width="570" height="24" fill="none" stroke="var(--line-soft)" stroke-width="1"/>
+<text x="176" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Bột sữa béo thực vật</text>
+<text x="310" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Bao</text>
+<text x="350" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">10</text>
+<text x="390" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">420.000</text>
+<text x="465" y="238" font-size="10" fill="var(--ink-2)" font-family="JetBrains Mono">LOT-2611B</text>
+<text x="550" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">10/08/2027</text>
+<text x="645" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">4.200.000</text>
+<rect x="170" y="246" width="570" height="24" fill="none" stroke="var(--line-soft)" stroke-width="1"/>
+<text x="176" y="262" font-size="10" fill="var(--red)" font-family="Be Vietnam Pro">+ Thêm dòng nguyên liệu</text>
+<text x="732" y="262" font-size="10.5" text-anchor="end" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Tổng giá trị phiếu nhập: 7.500.000 đ</text>
+<text x="170" y="288" font-size="10" fill="var(--orange)" font-family="Be Vietnam Pro" font-style="italic">Chỉ cập nhật LoNguyenLieu và TonKhoChiNhanh sau khi bấm Xác nhận nhập kho.</text>
+<rect x="595" y="306" width="145" height="28" rx="6" fill="var(--purple)" stroke="var(--purple)" stroke-width="1.5"/><text x="667.5" y="324" font-size="10.5" text-anchor="middle" fill="#fff" font-family="Be Vietnam Pro" font-weight="700">Xác nhận nhập kho</text>
+<rect x="495" y="306" width="90" height="28" rx="6" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="540" y="324" font-size="10.5" text-anchor="middle" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Lưu tạm</text>
+</svg><span class="zoom-badge">🔍 Nhấn để phóng to &amp; vẽ</span></div>
+<div class="diagram-caption">Hình 2.9. Giao diện lập phiếu nhập kho (BM02).</div>
+</section>
+
+<section><h2><span class="num">2.6.5.</span> Màn hình BM03 – Giao diện lập phiếu xuất kho</h2>
+<h3>2.6.5.1. Mục đích</h3>
+<p>Màn hình <code>BM03</code> được sử dụng để ghi nhận các nghiệp vụ xuất nguyên liệu khỏi kho như xuất hủy nguyên liệu hết hạn, nguyên liệu hư hỏng hoặc các trường hợp xuất kho hợp lệ khác.</p>
+<div class="def-box green"><div class="label">Cơ chế trừ kho tự động khi pha chế (QĐ05)</div><p>Đối với nguyên liệu phục vụ pha chế đơn hàng, hệ thống thực hiện kiểm tra công thức, tồn kho và tự động trừ nguyên liệu khi đơn hàng chuyển sang trạng thái <strong>đang pha chế</strong> theo <strong>QĐ05</strong>. Nghiệp vụ tự động này được xử lý theo quy trình đơn hàng, không yêu cầu nhân viên lập thêm một phiếu xuất thủ công để trừ kho lần thứ hai.</p></div>
+
+<h3>2.6.5.2. Người sử dụng</h3>
+<ul><li>Nhân viên kho.</li><li>Quản lý cửa hàng.</li></ul>
+
+<h3>2.6.5.3. Thành phần giao diện</h3>
+<div class="tw"><table class="cmp-table"><thead><tr><th style="width:8%">STT</th><th style="width:28%">Thành phần</th><th style="width:64%">Mô tả</th></tr></thead><tbody>
+<tr><td>1</td><td>Mã phiếu xuất</td><td>Mã định danh phiếu xuất.</td></tr>
+<tr><td>2</td><td>Chi nhánh</td><td>Chọn chi nhánh thực hiện xuất kho.</td></tr>
+<tr><td>3</td><td>Ngày xuất</td><td>Ghi nhận ngày thực hiện xuất kho.</td></tr>
+<tr><td>4</td><td>Lý do xuất</td><td>Chọn hết hạn, hư hỏng hoặc lý do xuất hợp lệ khác.</td></tr>
+<tr><td>5</td><td>Nguyên liệu</td><td>Chọn nguyên liệu cần xuất.</td></tr>
+<tr><td>6</td><td>Mã lô</td><td>Chọn lô nguyên liệu cần xuất.</td></tr>
+<tr><td>7</td><td>Hạn sử dụng</td><td>Hiển thị hạn sử dụng của lô.</td></tr>
+<tr><td>8</td><td>Số lượng tồn</td><td>Hiển thị số lượng còn lại của lô.</td></tr>
+<tr><td>9</td><td>Số lượng xuất</td><td>Nhập số lượng nguyên liệu cần xuất.</td></tr>
+<tr><td>10</td><td>Đơn vị tính</td><td>Hiển thị đơn vị tính của nguyên liệu.</td></tr>
+<tr><td>11</td><td>Nhân viên thực hiện</td><td>Hiển thị người đang lập phiếu.</td></tr>
+<tr><td>12</td><td>Ghi chú</td><td>Ghi rõ tình trạng nguyên liệu hoặc lý do xuất.</td></tr>
+<tr><td>13</td><td>Nút chức năng</td><td>Thêm dòng nguyên liệu, xóa dòng, lưu và xác nhận phiếu xuất.</td></tr>
+</tbody></table></div>
+
+<h3>2.6.5.4. Mô tả hoạt động</h3>
+<p>Khi phát sinh nhu cầu xuất nguyên liệu thủ công, nhân viên kho mở màn hình <code>BM03</code>, lựa chọn lý do xuất kho, chọn nguyên liệu, lô cần xuất, nhập số lượng và ghi rõ lý do thực hiện. Hệ thống kiểm tra số lượng xuất không vượt quá số lượng còn lại của lô. Sau khi phiếu xuất được xác nhận hợp lệ, hệ thống cập nhật số lượng còn lại trong <code>LoNguyenLieu</code>, tổng số lượng tồn tại chi nhánh trong <code>TonKhoChiNhanh</code> và ghi nhận giao dịch vào <code>LichSuKho</code>.</p>
+<p>Đối với nghiệp vụ pha chế, hệ thống căn cứ vào công thức trong bảng <code>CongThuc</code> theo sản phẩm và kích cỡ tương ứng trong <code>SanPhamKichCo</code>. Khi đơn hàng chuyển sang trạng thái đang pha chế, hệ thống kiểm tra lượng nguyên liệu cần thiết và thực hiện trừ kho theo nguyên tắc <strong>FEFO</strong> (hết hạn trước xuất trước). Nếu không đủ nguyên liệu, hệ thống không cho phép chuyển trạng thái và gửi cảnh báo đến nhân viên kho.</p>
+
+<h3>2.6.5.5. Kiểm tra dữ liệu</h3>
+<ul>
+<li>Phiếu xuất phải có ít nhất một dòng nguyên liệu; phải xác định chi nhánh thực hiện xuất kho; số lượng xuất phải lớn hơn 0.</li>
+<li>Không được xuất vượt số lượng tồn của lô; không được sử dụng lô nguyên liệu đã hết hạn để pha chế.</li>
+<li>Phải ghi rõ lý do đối với nguyên liệu xuất do hết hạn hoặc hư hỏng.</li>
+<li>Việc xuất nguyên liệu phục vụ pha chế phải tuân thủ công thức và nguyên tắc FEFO; chỉ trừ kho một lần cho mỗi lần xử lý đơn hàng.</li>
+<li>Số lượng tồn của lô và tổng tồn kho chi nhánh phải được cập nhật đồng bộ.</li>
+</ul>
+
+<div class="diagram-wrap" data-diagram role="button" tabindex="0" aria-label="Hình 2.10 — Giao diện lập phiếu xuất kho (BM03)"><svg viewBox="0 0 760 356" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="760" height="356" rx="10" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/>
+<rect x="0" y="0" width="760" height="36" rx="10" fill="var(--wash)" stroke="var(--line)" stroke-width="1.5"/>
+<text x="14" y="23" font-size="13" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Mây Xanh · Quản lý Trà Sữa</text>
+<text x="746" y="23" font-size="11" text-anchor="end" fill="var(--ink-2)" font-family="Be Vietnam Pro">Trần Quốc Bảo (Thủ kho · CN Biên Hòa) ▾</text>
+<rect x="0" y="36" width="150" height="320" fill="var(--wash)" stroke="var(--line)" stroke-width="1.5"/>
+<text x="18" y="68" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Bán hàng (BM01)</text>
+<text x="18" y="98" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Nhập kho (BM02)</text>
+<rect x="8" y="110" width="134" height="26" rx="6" fill="var(--purple)" stroke="var(--purple)" stroke-width="1.5"/>
+<text x="18" y="128" font-size="11.5" fill="#fff" font-family="Be Vietnam Pro" font-weight="700">Xuất kho (BM03)</text>
+<text x="18" y="158" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Hóa đơn (BM04)</text>
+<text x="18" y="188" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Báo cáo (BM05)</text>
+<text x="170" y="64" font-size="14" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Lập phiếu xuất kho thủ công / xuất hủy (BM03)</text>
+<text x="170" y="88" font-size="10" fill="var(--muted)" font-family="Be Vietnam Pro">Mã phiếu xuất</text>
+<rect x="170" y="93" width="270" height="24" rx="3" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="178" y="109" font-size="10.5" fill="var(--ink)" font-family="JetBrains Mono">PX-20261112-004</text>
+<text x="460" y="88" font-size="10" fill="var(--muted)" font-family="Be Vietnam Pro">Chi nhánh / Ngày xuất</text>
+<rect x="460" y="93" width="270" height="24" rx="3" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="468" y="109" font-size="10.5" fill="var(--ink)" font-family="Be Vietnam Pro">CN Biên Hòa · 12/11/2026</text>
+<text x="170" y="133" font-size="10" fill="var(--muted)" font-family="Be Vietnam Pro">Lý do xuất kho</text>
+<rect x="170" y="138" width="270" height="24" rx="3" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="178" y="154" font-size="10.5" fill="var(--red)" font-family="Be Vietnam Pro" font-weight="700">Xuất hủy nguyên liệu hết hạn ▾</text>
+<text x="460" y="133" font-size="10" fill="var(--muted)" font-family="Be Vietnam Pro">Ghi chú kiểm tra</text>
+<rect x="460" y="138" width="270" height="24" rx="3" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="468" y="154" font-size="10.5" fill="var(--ink)" font-family="Be Vietnam Pro">Lô quá hạn dùng, niêm phong hủy</text>
+<rect x="170" y="174" width="570" height="24" fill="var(--t-purple)" stroke="var(--line)" stroke-width="1.5"/>
+<text x="176" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Nguyên liệu</text>
+<text x="315" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Mã lô</text>
+<text x="405" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Hạn sử dụng</text>
+<text x="505" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Tồn lô</text>
+<text x="580" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">SL xuất</text>
+<text x="665" y="190" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">ĐVT</text>
+<rect x="170" y="198" width="570" height="24" fill="none" stroke="var(--line-soft)" stroke-width="1"/>
+<text x="176" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Sữa tươi thanh trùng</text>
+<text x="315" y="214" font-size="10" fill="var(--ink-2)" font-family="JetBrains Mono">LOT-2610S</text>
+<text x="405" y="214" font-size="10" fill="var(--red)" font-family="Be Vietnam Pro">11/11/2026 ⚠</text>
+<text x="505" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">4</text>
+<text x="580" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">4</text>
+<text x="665" y="214" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Hộp</text>
+<rect x="170" y="222" width="570" height="24" fill="none" stroke="var(--line-soft)" stroke-width="1"/>
+<text x="176" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Trân châu trắng</text>
+<text x="315" y="238" font-size="10" fill="var(--ink-2)" font-family="JetBrains Mono">LOT-2609T</text>
+<text x="405" y="238" font-size="10" fill="var(--red)" font-family="Be Vietnam Pro">10/11/2026 ⚠</text>
+<text x="505" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">2</text>
+<text x="580" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">2</text>
+<text x="665" y="238" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Túi</text>
+<rect x="170" y="246" width="570" height="24" fill="none" stroke="var(--line-soft)" stroke-width="1"/>
+<text x="176" y="262" font-size="10" fill="var(--red)" font-family="Be Vietnam Pro">+ Thêm dòng nguyên liệu xuất</text>
+<text x="170" y="288" font-size="10" fill="var(--orange)" font-family="Be Vietnam Pro" font-style="italic">Lưu ý: Nguyên liệu pha chế được hệ thống tự động trừ kho FEFO khi đơn pha chế (QĐ05).</text>
+<rect x="595" y="306" width="145" height="28" rx="6" fill="var(--purple)" stroke="var(--purple)" stroke-width="1.5"/><text x="667.5" y="324" font-size="10.5" text-anchor="middle" fill="#fff" font-family="Be Vietnam Pro" font-weight="700">Xác nhận xuất kho</text>
+<rect x="495" y="306" width="90" height="28" rx="6" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="540" y="324" font-size="10.5" text-anchor="middle" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Hủy phiếu</text>
+</svg><span class="zoom-badge">🔍 Nhấn để phóng to &amp; vẽ</span></div>
+<div class="diagram-caption">Hình 2.10. Giao diện lập phiếu xuất kho (BM03).</div>
+</section>
+
+<section><h2><span class="num">2.6.6.</span> Màn hình BM04 – Giao diện hóa đơn bán hàng</h2>
+<h3>2.6.6.1. Mục đích</h3>
+<p>Màn hình <code>BM04</code> được sử dụng để hiển thị và tra cứu hóa đơn của đơn hàng sau khi thông tin bán hàng được ghi nhận. Hóa đơn thể hiện thông tin cửa hàng, chi nhánh, khách hàng, danh sách sản phẩm, số lượng, đơn giá, các khoản giảm giá, điểm sử dụng, phí giao hàng và tổng tiền. Màn hình giúp nhân viên thu ngân kiểm tra thông tin giao dịch, tra cứu hóa đơn và thực hiện in hóa đơn khi cần thiết.</p>
+
+<h3>2.6.6.2. Người sử dụng</h3>
+<ul><li>Nhân viên thu ngân.</li><li>Quản lý cửa hàng.</li></ul>
+
+<h3>2.6.6.3. Thành phần giao diện</h3>
+<div class="tw"><table class="cmp-table"><thead><tr><th style="width:8%">STT</th><th style="width:28%">Thành phần</th><th style="width:64%">Mô tả</th></tr></thead><tbody>
+<tr><td>1</td><td>Mã hóa đơn</td><td>Mã định danh hóa đơn.</td></tr>
+<tr><td>2</td><td>Ngày lập</td><td>Ngày và thời điểm lập hóa đơn.</td></tr>
+<tr><td>3</td><td>Thông tin cửa hàng</td><td>Tên cửa hàng, chi nhánh và thông tin liên hệ.</td></tr>
+<tr><td>4</td><td>Thông tin khách hàng</td><td>Họ tên và số điện thoại nếu có.</td></tr>
+<tr><td>5</td><td>Mã đơn hàng</td><td>Mã đơn hàng liên kết với hóa đơn.</td></tr>
+<tr><td>6</td><td>Danh sách sản phẩm</td><td>Tên sản phẩm, kích cỡ, số lượng, đơn giá và thành tiền.</td></tr>
+<tr><td>7</td><td>Tổng tiền hàng</td><td>Tổng tiền hàng trước các khoản giảm.</td></tr>
+<tr><td>8</td><td>Giảm giá</td><td>Số tiền được giảm theo mã khuyến mãi.</td></tr>
+<tr><td>9</td><td>Điểm sử dụng</td><td>Số điểm được sử dụng và số tiền quy đổi.</td></tr>
+<tr><td>10</td><td>Phí giao hàng</td><td>Phí vận chuyển nếu có.</td></tr>
+<tr><td>11</td><td>Tổng thanh toán</td><td>Tổng số tiền theo dữ liệu đơn hàng.</td></tr>
+<tr><td>12</td><td>Phương thức thanh toán</td><td>Tiền mặt, chuyển khoản hoặc COD.</td></tr>
+<tr><td>13</td><td>Trạng thái thanh toán</td><td>Hiển thị trạng thái thanh toán thực tế.</td></tr>
+<tr><td>14</td><td>Nút chức năng</td><td>Xem chi tiết, in hóa đơn và quay lại danh sách đơn hàng.</td></tr>
+</tbody></table></div>
+
+<h3>2.6.6.4. Mô tả hoạt động</h3>
+<p>Nhân viên thu ngân truy cập màn hình <code>BM04</code> và tìm kiếm hóa đơn theo mã hóa đơn hoặc mã đơn hàng. Hệ thống lấy thông tin từ các bảng <code>DonHang</code>, <code>ChiTietDonHang</code>, <code>ThanhToan</code>, <code>HoaDon</code> và <code>ChiTietHoaDon</code> để hiển thị nội dung tương ứng.</p>
+<p>Trạng thái thanh toán trên hóa đơn phải phản ánh đúng giao dịch thực tế. Đối với đơn COD, hóa đơn không được thể hiện là đã thanh toán trước khi nhân viên giao hàng xác nhận đã thu tiền. Hệ thống không cho phép tự ý thay đổi tổng tiền sau khi đơn hàng đã được xác nhận; trường hợp phát sinh sai sót phải được xử lý theo nghiệp vụ điều chỉnh phù hợp.</p>
+
+<h3>2.6.6.5. Kiểm tra dữ liệu</h3>
+<ul>
+<li>Hóa đơn phải liên kết với một đơn hàng hợp lệ; số lượng và đơn giá trên hóa đơn phải phù hợp với chi tiết đơn hàng.</li>
+<li>Tổng tiền phải được tính thống nhất theo dữ liệu đơn hàng; thông tin giảm giá và điểm sử dụng phải phù hợp với quy định.</li>
+<li>Phương thức và trạng thái thanh toán phải phản ánh đúng giao dịch; đơn COD chưa thu được tiền không được hiển thị là đã thanh toán.</li>
+<li>Không cho phép tự ý chỉnh sửa tổng tiền hóa đơn sau khi đơn hàng đã được xác nhận.</li>
+</ul>
+
+<div class="diagram-wrap" data-diagram role="button" tabindex="0" aria-label="Hình 2.11 — Giao diện hóa đơn bán hàng (BM04)"><svg viewBox="0 0 760 364" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="760" height="364" rx="10" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/>
+<rect x="0" y="0" width="760" height="36" rx="10" fill="var(--wash)" stroke="var(--line)" stroke-width="1.5"/>
+<text x="14" y="23" font-size="13" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Mây Xanh · Quản lý Trà Sữa</text>
+<text x="746" y="23" font-size="11" text-anchor="end" fill="var(--ink-2)" font-family="Be Vietnam Pro">Lê Minh Anh (Thu ngân · CN Biên Hòa) ▾</text>
+<rect x="0" y="36" width="150" height="328" fill="var(--wash)" stroke="var(--line)" stroke-width="1.5"/>
+<text x="18" y="68" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Bán hàng (BM01)</text>
+<text x="18" y="98" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Nhập kho (BM02)</text>
+<text x="18" y="128" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Xuất kho (BM03)</text>
+<rect x="8" y="140" width="134" height="26" rx="6" fill="var(--purple)" stroke="var(--purple)" stroke-width="1.5"/>
+<text x="18" y="158" font-size="11.5" fill="#fff" font-family="Be Vietnam Pro" font-weight="700">Hóa đơn (BM04)</text>
+<text x="18" y="188" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Báo cáo (BM05)</text>
+<text x="170" y="64" font-size="14" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Hóa đơn bán hàng (BM04)</text>
+<rect x="170" y="76" width="570" height="226" rx="8" fill="var(--wash)" stroke="var(--line)" stroke-width="1.5"/>
+<text x="455" y="96" font-size="12" text-anchor="middle" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">TRÀ SỮA MÂY XANH — CHI NHÁNH BIÊN HÒA</text>
+<text x="455" y="111" font-size="9.5" text-anchor="middle" fill="var(--muted)" font-family="Be Vietnam Pro">ĐC: 45 Võ Thị Sáu, P. Thống Nhất, Biên Hòa · Hotline: 0251.388.9999</text>
+<line x1="185" y1="119" x2="725" y2="119" stroke="var(--line-soft)" stroke-dasharray="4 3"/>
+<text x="188" y="135" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro">Mã HĐ: <tspan font-family="JetBrains Mono" font-weight="700">HD-20261112-0042</tspan> · Đơn: <tspan font-family="JetBrains Mono">DH-20261112-0042</tspan></text>
+<text x="722" y="135" font-size="10" text-anchor="end" fill="var(--ink-2)" font-family="Be Vietnam Pro">Ngày: 12/11/2026 12:45</text>
+<text x="188" y="150" font-size="10" fill="var(--ink-2)" font-family="Be Vietnam Pro">Khách hàng: Nguyễn Thảo Vy (0901234567)</text>
+<text x="722" y="150" font-size="10" text-anchor="end" fill="var(--green)" font-family="Be Vietnam Pro" font-weight="700">TT: Chuyển khoản · Đã thanh toán</text>
+<rect x="188" y="160" width="534" height="22" fill="var(--t-purple)" stroke="var(--line)" stroke-width="1"/>
+<text x="194" y="175" font-size="9.5" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Sản phẩm &amp; Topping</text>
+<text x="480" y="175" font-size="9.5" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">SL</text>
+<text x="545" y="175" font-size="9.5" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Đơn giá</text>
+<text x="645" y="175" font-size="9.5" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Thành tiền</text>
+<text x="194" y="196" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">Trà Sữa Mây Xanh (L) + Trân châu đen</text><text x="480" y="196" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">2</text><text x="545" y="196" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">42.000</text><text x="645" y="196" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">84.000</text>
+<text x="194" y="213" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">Trà Ô Long Kem Cheese (M) + Thạch dừa</text><text x="480" y="213" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">1</text><text x="545" y="213" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">44.000</text><text x="645" y="213" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">44.000</text>
+<line x1="188" y1="223" x2="722" y2="223" stroke="var(--line-soft)"/>
+<text x="194" y="239" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">Tổng tiền hàng: 128.000 đ · Giảm coupon: -12.800 đ · Quy đổi 100 điểm: -10.000 đ · Phí ship: 0 đ</text>
+<text x="720" y="262" font-size="12" text-anchor="end" fill="var(--purple)" font-family="Be Vietnam Pro" font-weight="800">TỔNG THANH TOÁN: 105.200 đ</text>
+<text x="194" y="285" font-size="9.5" fill="var(--muted)" font-family="Be Vietnam Pro" font-style="italic">Dữ liệu đồng bộ từ DonHang &amp; ThanhToan; khóa chỉnh sửa trực tiếp tổng tiền.</text>
+<rect x="625" y="316" width="115" height="28" rx="6" fill="var(--purple)" stroke="var(--purple)" stroke-width="1.5"/><text x="682.5" y="334" font-size="10.5" text-anchor="middle" fill="#fff" font-family="Be Vietnam Pro" font-weight="700">🖨 In hóa đơn</text>
+<rect x="495" y="316" width="120" height="28" rx="6" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="555" y="334" font-size="10.5" text-anchor="middle" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Danh sách đơn</text>
+</svg><span class="zoom-badge">🔍 Nhấn để phóng to &amp; vẽ</span></div>
+<div class="diagram-caption">Hình 2.11. Giao diện hóa đơn bán hàng (BM04).</div>
+</section>
+
+<section><h2><span class="num">2.6.7.</span> Màn hình BM05 – Giao diện báo cáo doanh thu</h2>
+<h3>2.6.7.1. Mục đích</h3>
+<p>Màn hình <code>BM05</code> hỗ trợ quản lý theo dõi tình hình kinh doanh theo ngày, tháng hoặc một khoảng thời gian cụ thể. Các thông tin báo cáo gồm số lượng đơn hàng, số đơn bị hủy, doanh thu, khoản giảm giá, doanh thu thực tế và danh sách sản phẩm bán chạy. Quản lý có thể lọc dữ liệu theo từng chi nhánh hoặc xem số liệu tổng hợp toàn hệ thống để đánh giá tình hình kinh doanh.</p>
+
+<h3>2.6.7.2. Người sử dụng</h3>
+<ul><li>Quản lý cửa hàng.</li></ul>
+
+<h3>2.6.7.3. Thành phần giao diện</h3>
+<div class="tw"><table class="cmp-table"><thead><tr><th style="width:8%">STT</th><th style="width:28%">Thành phần</th><th style="width:64%">Mô tả</th></tr></thead><tbody>
+<tr><td>1</td><td>Loại báo cáo</td><td>Chọn báo cáo theo ngày, tháng hoặc khoảng thời gian.</td></tr>
+<tr><td>2</td><td>Thời gian bắt đầu</td><td>Chọn ngày bắt đầu kỳ báo cáo.</td></tr>
+<tr><td>3</td><td>Thời gian kết thúc</td><td>Chọn ngày kết thúc kỳ báo cáo.</td></tr>
+<tr><td>4</td><td>Chi nhánh</td><td>Chọn chi nhánh hoặc xem toàn hệ thống.</td></tr>
+<tr><td>5</td><td>Tổng số đơn hàng</td><td>Số đơn hàng phát sinh trong kỳ.</td></tr>
+<tr><td>6</td><td>Số đơn bị hủy</td><td>Số đơn có trạng thái đã hủy trong kỳ.</td></tr>
+<tr><td>7</td><td>Doanh thu</td><td>Giá trị bán hàng được tổng hợp theo quy tắc báo cáo.</td></tr>
+<tr><td>8</td><td>Tổng giảm giá</td><td>Tổng khoản giảm giá được ghi nhận trong kỳ.</td></tr>
+<tr><td>9</td><td>Doanh thu thực tế</td><td>Doanh thu sau khi xử lý các khoản giảm và hoàn trả theo quy tắc thống nhất.</td></tr>
+<tr><td>10</td><td>Sản phẩm bán chạy</td><td>Danh sách 5 sản phẩm có số lượng bán cao nhất.</td></tr>
+<tr><td>11</td><td>Biểu đồ doanh thu</td><td>Minh họa doanh thu theo ngày hoặc theo tháng.</td></tr>
+<tr><td>12</td><td>Nút chức năng</td><td>Lọc báo cáo, làm mới dữ liệu và xuất báo cáo.</td></tr>
+</tbody></table></div>
+
+<h3>2.6.7.4. Mô tả hoạt động</h3>
+<p>Quản lý đăng nhập vào hệ thống và truy cập chức năng báo cáo doanh thu. Tại màn hình <code>BM05</code>, quản lý lựa chọn loại báo cáo, khoảng thời gian và chi nhánh cần xem. Hệ thống truy vấn dữ liệu đơn hàng, chi tiết đơn hàng, thanh toán và các thông tin liên quan để tổng hợp kết quả dưới dạng các chỉ số tổng quan, bảng thống kê và biểu đồ doanh thu.</p>
+<div class="def-box amber"><div class="label">Lưu ý kỹ thuật đối với View vw_BaoCaoDoanhThu</div><p>Cơ sở dữ liệu có View <code>vw_BaoCaoDoanhThu</code> hỗ trợ tổng hợp doanh thu. Tuy nhiên, trước khi sử dụng chính thức, cần kiểm tra và điều chỉnh View để loại trừ đơn hàng đã hủy, đồng thời thống nhất cách xử lý giảm giá và hoàn trả. Các số liệu trên giao diện phải được đối chiếu với quy tắc tính doanh thu đã xác định, không sử dụng trực tiếp kết quả chưa được kiểm tra.</p></div>
+
+<h3>2.6.7.5. Kiểm tra dữ liệu</h3>
+<ul>
+<li>Chỉ tài khoản có quyền quản lý mới được truy cập chức năng báo cáo doanh thu.</li>
+<li>Ngày bắt đầu không được lớn hơn ngày kết thúc; chi nhánh được chọn phải tồn tại trong hệ thống.</li>
+<li>Đơn hàng đã hủy không được tính vào doanh thu bán hàng thực tế; các khoản giảm giá và hoàn trả phải được xử lý theo cùng một quy tắc báo cáo.</li>
+<li>Danh sách sản phẩm bán chạy chỉ lấy dữ liệu trong khoảng thời gian được chọn; nếu không có dữ liệu trong kỳ báo cáo, hệ thống hiển thị thông báo phù hợp.</li>
+<li>Dữ liệu báo cáo phải được tổng hợp từ cơ sở dữ liệu tập trung <code>MayXanhDB</code>, kiểm tra tính thống nhất giữa các chi nhánh và toàn hệ thống.</li>
+</ul>
+
+<div class="diagram-wrap" data-diagram role="button" tabindex="0" aria-label="Hình 2.12 — Giao diện báo cáo doanh thu (BM05)"><svg viewBox="0 0 760 356" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="760" height="356" rx="10" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/>
+<rect x="0" y="0" width="760" height="36" rx="10" fill="var(--wash)" stroke="var(--line)" stroke-width="1.5"/>
+<text x="14" y="23" font-size="13" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Mây Xanh · Quản lý Trà Sữa</text>
+<text x="746" y="23" font-size="11" text-anchor="end" fill="var(--ink-2)" font-family="Be Vietnam Pro">Phạm Hoàng Nam (Quản lý hệ thống) ▾</text>
+<rect x="0" y="36" width="150" height="320" fill="var(--wash)" stroke="var(--line)" stroke-width="1.5"/>
+<text x="18" y="68" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Bán hàng (BM01)</text>
+<text x="18" y="98" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Nhập kho (BM02)</text>
+<text x="18" y="128" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Xuất kho (BM03)</text>
+<text x="18" y="158" font-size="11.5" fill="var(--ink)" font-family="Be Vietnam Pro">Hóa đơn (BM04)</text>
+<rect x="8" y="170" width="134" height="26" rx="6" fill="var(--purple)" stroke="var(--purple)" stroke-width="1.5"/>
+<text x="18" y="188" font-size="11.5" fill="#fff" font-family="Be Vietnam Pro" font-weight="700">Báo cáo (BM05)</text>
+<text x="170" y="64" font-size="14" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Báo cáo doanh thu (BM05)</text>
+<rect x="170" y="76" width="570" height="26" rx="4" fill="var(--wash)" stroke="var(--line)" stroke-width="1"/>
+<text x="180" y="93" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro">Kỳ: Theo tháng ▾ · Từ: 01/11/2026 · Đến: 12/11/2026 · Chi nhánh: Toàn hệ thống ▾</text>
+<rect x="170" y="110" width="135" height="44" rx="6" fill="var(--t-blue)" stroke="var(--blue)" stroke-width="1.2"/>
+<text x="180" y="126" font-size="9.5" fill="var(--muted)" font-family="Be Vietnam Pro">Tổng đơn / Hủy</text>
+<text x="180" y="144" font-size="12" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="800">1.240 / 18</text>
+<rect x="315" y="110" width="135" height="44" rx="6" fill="var(--t-purple)" stroke="var(--purple)" stroke-width="1.2"/>
+<text x="325" y="126" font-size="9.5" fill="var(--muted)" font-family="Be Vietnam Pro">Doanh thu gộp</text>
+<text x="325" y="144" font-size="12" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="800">54.800.000 đ</text>
+<rect x="460" y="110" width="135" height="44" rx="6" fill="var(--t-orange)" stroke="var(--orange)" stroke-width="1.2"/>
+<text x="470" y="126" font-size="9.5" fill="var(--muted)" font-family="Be Vietnam Pro">Tổng giảm giá</text>
+<text x="470" y="144" font-size="12" fill="var(--orange)" font-family="Be Vietnam Pro" font-weight="800">-4.150.000 đ</text>
+<rect x="605" y="110" width="135" height="44" rx="6" fill="var(--t-green)" stroke="var(--green)" stroke-width="1.2"/>
+<text x="615" y="126" font-size="9.5" fill="var(--muted)" font-family="Be Vietnam Pro">Doanh thu thực tế</text>
+<text x="615" y="144" font-size="12" fill="var(--green)" font-family="Be Vietnam Pro" font-weight="800">50.650.000 đ</text>
+<rect x="170" y="164" width="270" height="132" rx="6" fill="var(--card)" stroke="var(--line)" stroke-width="1.2"/>
+<text x="180" y="180" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Biểu đồ doanh thu thực tế (triệu đ)</text>
+<rect x="190" y="235" width="24" height="45" fill="var(--purple)"/><text x="202" y="290" font-size="8.5" text-anchor="middle" fill="var(--muted)">T2</text>
+<rect x="228" y="220" width="24" height="60" fill="var(--purple)"/><text x="240" y="290" font-size="8.5" text-anchor="middle" fill="var(--muted)">T3</text>
+<rect x="266" y="228" width="24" height="52" fill="var(--purple)"/><text x="278" y="290" font-size="8.5" text-anchor="middle" fill="var(--muted)">T4</text>
+<rect x="304" y="210" width="24" height="70" fill="var(--purple)"/><text x="316" y="290" font-size="8.5" text-anchor="middle" fill="var(--muted)">T5</text>
+<rect x="342" y="200" width="24" height="80" fill="var(--purple)"/><text x="354" y="290" font-size="8.5" text-anchor="middle" fill="var(--muted)">T6</text>
+<rect x="380" y="190" width="24" height="90" fill="var(--green)"/><text x="392" y="290" font-size="8.5" text-anchor="middle" fill="var(--muted)">T7</text>
+<rect x="450" y="164" width="290" height="132" rx="6" fill="var(--card)" stroke="var(--line)" stroke-width="1.2"/>
+<text x="460" y="180" font-size="10" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Top 5 sản phẩm bán chạy</text>
+<text x="460" y="199" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">1. Trà Sữa Mây Xanh Đặc Biệt — 412 ly</text>
+<text x="460" y="217" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">2. Trà Ô Long Kem Cheese — 328 ly</text>
+<text x="460" y="235" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">3. Trà Đào Cam Sả — 275 ly</text>
+<text x="460" y="253" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">4. Sữa Tươi Trân Châu Đường Đen — 219 ly</text>
+<text x="460" y="271" font-size="9.5" fill="var(--ink-2)" font-family="Be Vietnam Pro">5. Trà Vải Hoa Hồng — 164 ly</text>
+<rect x="635" y="308" width="105" height="28" rx="6" fill="var(--purple)" stroke="var(--purple)" stroke-width="1.5"/><text x="687.5" y="326" font-size="10.5" text-anchor="middle" fill="#fff" font-family="Be Vietnam Pro" font-weight="700">Xuất báo cáo</text>
+<rect x="525" y="308" width="100" height="28" rx="6" fill="var(--card)" stroke="var(--line)" stroke-width="1.5"/><text x="575" y="326" font-size="10.5" text-anchor="middle" fill="var(--ink)" font-family="Be Vietnam Pro" font-weight="700">Lọc dữ liệu</text>
+</svg><span class="zoom-badge">🔍 Nhấn để phóng to &amp; vẽ</span></div>
+<div class="diagram-caption">Hình 2.12. Giao diện báo cáo doanh thu (BM05).</div>
+</section>
+
+<section><h2><span class="num">2.6.8.</span> Thiết kế điều hướng và phân quyền giao diện</h2>
+<p>Hệ thống sử dụng giao diện điều hướng chung sau khi người dùng đăng nhập. Hệ thống xác định vai trò của tài khoản thông qua các bảng <code>TaiKhoan</code> và <code>VaiTro</code>, sau đó hiển thị các chức năng phù hợp với nhiệm vụ được phân công.</p>
+<p>Giao diện thống nhất gồm thanh điều hướng, khu vực thông tin tài khoản, nội dung chức năng và khu vực thông báo. Các mục chức năng được tổ chức theo nhóm nghiệp vụ để người dùng dễ dàng truy cập. Việc ẩn chức năng trên giao diện không thay thế cho kiểm tra quyền ở phía máy chủ; mọi thao tác cần được xác thực quyền trước khi thực hiện.</p>
+
+<h3>Bảng 2.x. Ma trận phân quyền các chức năng giao diện</h3>
+<div class="tw"><table class="cmp-table"><thead><tr><th style="width:35%">Chức năng</th><th style="width:13%;text-align:center">Thu ngân</th><th style="width:13%;text-align:center">Pha chế</th><th style="width:13%;text-align:center">Giao hàng</th><th style="width:13%;text-align:center">Thủ kho</th><th style="width:13%;text-align:center">Quản lý</th></tr></thead><tbody>
+<tr><td>Tạo và tiếp nhận đơn hàng</td><td style="text-align:center;color:var(--green);font-weight:700">✓</td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td></tr>
+<tr><td>Xem danh sách đơn hàng</td><td style="text-align:center;color:var(--green);font-weight:700">✓</td><td style="text-align:center;color:var(--green);font-weight:700">✓</td><td style="text-align:center;color:var(--green);font-weight:700">✓*</td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td></tr>
+<tr><td>Cập nhật trạng thái pha chế</td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td></tr>
+<tr><td>Cập nhật kết quả giao hàng</td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓*</td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td></tr>
+<tr><td>Lập phiếu nhập kho</td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td><td style="text-align:center;color:var(--green);font-weight:700">✓</td></tr>
+<tr><td>Lập phiếu xuất kho</td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td><td style="text-align:center;color:var(--green);font-weight:700">✓</td></tr>
+<tr><td>Quản lý sản phẩm và giá bán</td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td></tr>
+<tr><td>Quản lý thông tin khách hàng</td><td style="text-align:center;color:var(--green);font-weight:700">✓</td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td></tr>
+<tr><td>Xem và in hóa đơn</td><td style="text-align:center;color:var(--green);font-weight:700">✓</td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td></tr>
+<tr><td>Xem báo cáo doanh thu</td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td></tr>
+<tr><td>Quản lý nhân viên và tài khoản</td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td></tr>
+<tr><td>Quản lý nhà cung cấp</td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td><td style="text-align:center;color:var(--green);font-weight:700">✓</td></tr>
+<tr><td>Theo dõi tồn kho và cảnh báo</td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center"></td><td style="text-align:center;color:var(--green);font-weight:700">✓</td><td style="text-align:center;color:var(--green);font-weight:700">✓</td></tr>
+</tbody></table></div>
+
+<div class="def-box"><div class="label">Ghi chú phân quyền &amp; nghiệp vụ</div>
+<ul>
+<li>Nhân viên giao hàng chỉ được xem và cập nhật các đơn được phân công (<code>✓*</code>).</li>
+<li>Nhân viên pha chế được xem đơn cần chuẩn bị và cập nhật trạng thái pha chế theo quyền hạn.</li>
+<li>Nhân viên kho thực hiện nghiệp vụ nhập, xuất, kiểm kê và theo dõi nguyên liệu.</li>
+<li>Việc trừ nguyên liệu phục vụ pha chế được hệ thống tự động thực hiện khi đơn chuyển sang trạng thái đang pha chế; không trừ kho lần thứ hai khi hoàn tất pha chế.</li>
+<li>Chỉ quản lý được phép thay đổi giá bán, quản lý nhân viên và tài khoản, đồng thời xem báo cáo doanh thu theo <strong>QĐ12</strong>.</li>
+<li>Các thao tác thay đổi trạng thái đơn hàng và giao dịch kho phải được ghi nhận vào các bảng lịch sử nghiệp vụ tương ứng.</li>
+</ul></div>
+</section>
+</main>
+<div class="modal" id="zm" role="dialog" aria-label="Giao diện phóng to"><div class="mc"><div class="bar">
+<div class="grp"><button class="tb active" data-tool="pen">✏️ Bút</button><button class="tb" data-tool="eraser">🧹 Tẩy</button></div>
+<div class="grp"><button class="cb active" data-color="#ef4444" style="--c:#ef4444" aria-label="Màu 1"></button><button class="cb" data-color="#3b82f6" style="--c:#3b82f6" aria-label="Màu 2"></button><button class="cb" data-color="#10b981" style="--c:#10b981" aria-label="Màu 3"></button><button class="cb" data-color="#f59e0b" style="--c:#f59e0b" aria-label="Màu 4"></button><button class="cb" data-color="#8b5cf6" style="--c:#8b5cf6" aria-label="Màu 5"></button></div>
+<div class="grp"><button class="sb" data-size="2">•</button><button class="sb active" data-size="4">••</button><button class="sb" data-size="8">•••</button></div>
+<div class="sp"></div><button class="tb" id="clr">🗑️ Xóa hết</button><button class="tb" id="cls">✕ Đóng</button></div>
+<div class="ca" id="ca"><canvas id="dc"></canvas></div></div></div><script>(()=>{const q=s=>document.querySelector(s),mo=q('#zm'),ca=q('#ca'),cv=q('#dc'),x=cv.getContext('2d');let tool='pen',col='#ef4444',sz=4,dr=0,lx=0,ly=0;
+const close=()=>{mo.classList.remove('open');document.body.style.overflow='';setTimeout(()=>x.clearRect(0,0,cv.width,cv.height),280)};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&mo.classList.contains('open'))close();else if((e.key==='d'||e.key==='D')&&mo.classList.contains('open')===false){const n=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=n;try{localStorage.setItem('tk-theme',n)}catch(_){}}});
+function setup(){const s=ca.querySelector('svg'),a=ca.getBoundingClientRect(),r=s.getBoundingClientRect(),d=devicePixelRatio||1;
+ const vb=s.viewBox.baseVal,k=Math.min(r.width/vb.width,r.height/vb.height),w=vb.width*k,h=vb.height*k,l=r.left-a.left+(r.width-w)/2,t=r.top-a.top+(r.height-h)/2;
+ cv.width=Math.round(w*d);cv.height=Math.round(h*d);Object.assign(cv.style,{left:l+'px',top:t+'px',width:w+'px',height:h+'px'});x.setTransform(d,0,0,d,0,0);x.lineCap=x.lineJoin='round'}
+document.querySelectorAll('[data-diagram]').forEach(w=>{const open=()=>{ca.innerHTML='';ca.appendChild(w.querySelector('svg').cloneNode(true));ca.appendChild(cv);mo.classList.add('open');document.body.style.overflow='hidden';requestAnimationFrame(()=>requestAnimationFrame(setup))};
+ w.addEventListener('click',open);w.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})});
+const pos=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]},st=()=>{if(tool==='eraser'){x.globalCompositeOperation='destination-out';x.strokeStyle=x.fillStyle='#000';x.lineWidth=sz*4}else{x.globalCompositeOperation='source-over';x.strokeStyle=x.fillStyle=col;x.lineWidth=sz}};
+cv.addEventListener('pointerdown',e=>{e.preventDefault();dr=1;[lx,ly]=pos(e);try{cv.setPointerCapture(e.pointerId)}catch(_){}st();x.beginPath();x.arc(lx,ly,x.lineWidth/2,0,7);x.fill()});
+cv.addEventListener('pointermove',e=>{if(!dr)return;e.preventDefault();const[a,b]=pos(e);st();x.beginPath();x.moveTo(lx,ly);x.lineTo(a,b);x.stroke();lx=a;ly=b});
+['pointerup','pointercancel','pointerleave'].forEach(n=>cv.addEventListener(n,()=>dr=0));
+const sel=(a,f)=>document.querySelectorAll(a).forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll(a).forEach(o=>o.classList.remove('active'));b.classList.add('active');f(b)}));
+sel('[data-tool]',b=>tool=b.dataset.tool);sel('[data-color]',b=>{col=b.dataset.color;tool='pen';document.querySelectorAll('[data-tool]').forEach(o=>o.classList.toggle('active',o.dataset.tool==='pen'))});sel('[data-size]',b=>sz=+b.dataset.size);
+q('#clr').onclick=()=>x.clearRect(0,0,cv.width,cv.height);q('#cls').onclick=close;mo.addEventListener('click',e=>{if(e.target===mo)close()})})();</script></body></html>
