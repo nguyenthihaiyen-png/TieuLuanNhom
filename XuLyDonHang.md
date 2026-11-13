@@ -1,3 +1,4 @@
+![Sơ đồ](XulyDonHang.jpg)
 ```plantuml
 @startuml
 
@@ -116,4 +117,4 @@ endif
 
 stop
 @enduml
-![Sơ đồ](XulyDonHang.jpg)
+
