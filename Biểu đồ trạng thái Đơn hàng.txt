@@ -1,0 +1,104 @@
+@startuml
+
+title STATE MACHINE - VÒNG ĐỜI ĐƠN HÀNG MÂY XANH
+
+top to bottom direction
+skinparam shadowing false
+skinparam linetype polyline
+skinparam state {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+    FontColor Black
+}
+
+[*] --> New : taoDonHang()\n/coItNhatMotChiTiet
+
+state "Mới tạo" as New
+state "Chờ thanh toán" as WaitingPayment
+state "Đã xác nhận" as Confirmed
+state "Đang pha chế" as Preparing
+state "Sẵn sàng" as Ready
+state "Đang giao" as Delivering
+state "Đã giao" as Delivered
+state "Hoàn tất" as Completed
+state "Đã hủy" as Cancelled
+state "Đã hoàn trả" as Returned
+
+' Khai báo nút lựa chọn (Choice state) chuẩn cú pháp State Diagram
+state "Phân nhánh loại đơn" as CheckLoaiDon <<choice>>
+
+New --> WaitingPayment : xacNhanDatHang()\n/kiemTraDuLieuVaTinhTien
+
+' Thanh toán và xác nhận đơn
+WaitingPayment --> Confirmed : tienMat()\n[donTaiQuay && daThuTien]
+WaitingPayment --> Confirmed : chuyenKhoan()\n[daNhanDuTien]
+WaitingPayment --> Confirmed : COD()\n[donGiao && chonCOD]
+
+' Pha chế
+Confirmed --> Preparing : batDauPhaChe()\n[duNguyenLieu && duDieuKienThanhToan]\n/truKhoTheoCongThucFEFO()
+
+Preparing --> Ready : hoanTatPhaChe()\n[daChuanBiXong]
+
+' Phân nhánh theo loại đơn
+Ready --> CheckLoaiDon
+CheckLoaiDon --> Completed : [donTaiQuay]\n/ghiNhanKhachDaNhan()
+CheckLoaiDon --> Delivering : [donGiao && daPhanCong]\n/ghiNhanNhanVienGiao()
+
+' Giao hàng
+Delivering --> Delivered : giaoThanhCong()\n[khachDaNhanDon]
+Delivering --> Delivering : giaoThatBai()\n/ghiNhanLyDoGiaoThatBai()
+
+Delivered --> Completed : dongDonHang()
+
+' Hủy đơn trước khi pha chế
+New --> Cancelled : khachYeuCauHuy()\n[chuaPhaChe]
+WaitingPayment --> Cancelled : khachYeuCauHuy()\n[chuaPhaChe]
+Confirmed --> Cancelled : khachYeuCauHuy()\n[chuaPhaChe]
+
+' Hủy đơn sau khi bắt đầu pha chế
+Preparing --> Cancelled : quanLyDuyetHuy()\n[coLyDo && dungQuyen]
+Ready --> Cancelled : quanLyDuyetHuy()\n[coLyDo && dungQuyen]
+Delivering --> Cancelled : quanLyDuyetHuy()\n[coLyDo && dungQuyen]
+
+' Hoàn trả
+Completed --> Returned : yeuCauHoanTra()\n[donDaGiao && trong2Gio && loiCuaHang]
+
+' Trạng thái kết thúc
+Cancelled --> [*]
+Returned --> [*]
+Completed --> [*]
+
+note right of Confirmed
+  Đơn COD được phép chuyển sang
+  pha chế khi đã xác nhận phương thức COD.
+  Chưa ghi nhận là đã thu tiền.
+end note
+
+note right of Preparing
+  Chỉ chuyển sang pha chế khi:
+  - Đủ nguyên liệu.
+  - Đủ điều kiện thanh toán.
+
+  Nếu thiếu nguyên liệu:
+  - Không cho chuyển trạng thái.
+  - Thông báo cho thủ kho.
+end note
+
+note left of Cancelled
+  Trước khi pha chế:
+  Khách hàng có thể yêu cầu hủy.
+
+  Sau khi bắt đầu pha chế:
+  Chỉ quản lý được duyệt hủy
+  và phải ghi nhận lý do.
+end note
+
+note bottom of Returned
+  Chỉ hoàn trả khi:
+  - Đơn đã giao.
+  - Còn trong thời hạn 2 giờ.
+  - Lỗi thuộc về cửa hàng.
+end note
+
+@enduml

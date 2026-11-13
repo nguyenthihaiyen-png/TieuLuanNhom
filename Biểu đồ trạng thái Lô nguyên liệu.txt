@@ -1,0 +1,69 @@
+@startuml
+
+title STATE MACHINE - LÔ NGUYÊN LIỆU
+
+top to bottom direction
+skinparam shadowing false
+skinparam linetype polyline
+skinparam state {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+    FontColor Black
+}
+
+[*] --> Available : xacNhanNhapKho() [phieuHopLe && soLuong > 0 && coHanSuDung]\n/ taoLoVaGhiSoLuong()
+
+state "Có sẵn / Còn hạn" as Available
+state "Sắp hết hạn" as Expiring
+state "Đã hết hạn" as Expired
+state "Đã xuất hết" as FullyIssued
+state "Đã xuất hủy" as Disposed
+
+Available --> Expiring : datNguongCanhBao() [conHan && conSoLuong]\n/ guiCanhBaoSapHetHan()
+
+Available --> Expired : hetHanSuDung() [ngayHienTai > hanSuDung]\n/ khoaSuDungPhaChe()
+
+Expiring --> Expired : hetHanSuDung() [ngayHienTai > hanSuDung]\n/ khoaSuDungPhaChe()
+
+Available --> Available : xuatKho() [soLuongXuat < soLuongCon && duDieuKienFEFO]\n/ truSoLuongVaGhiLichSu()
+
+Expiring --> Expiring : xuatKho() [soLuongXuat < soLuongCon && duDieuKienFEFO]\n/ truSoLuongVaGhiLichSu()
+
+Available --> FullyIssued : xuatKho() [soLuongXuat == soLuongCon && duDieuKienFEFO]\n/ capNhatSoLuongBang0()
+
+Expiring --> FullyIssued : xuatKho() [soLuongXuat == soLuongCon && duDieuKienFEFO]\n/ capNhatSoLuongBang0()
+
+Expired --> Disposed : xacNhanXuatHuy() [nghiepVuHopLe]\n/ ghiNhanLyDoXuatHuyVaCapNhatTon()
+
+FullyIssued --> [*]
+Disposed --> [*]
+
+note right of Available
+  Lô còn hạn sử dụng
+  và còn số lượng tồn.
+end note
+
+note right of Expiring
+  Lô sắp hết hạn.
+  Hệ thống cảnh báo thủ kho
+  để ưu tiên sử dụng theo FEFO.
+end note
+
+note right of Expired
+  Lô đã hết hạn.
+  Không được phép sử dụng
+  để pha chế.
+end note
+
+note bottom of FullyIssued
+  Số lượng còn lại bằng 0
+  do đã xuất sử dụng hết.
+end note
+
+note bottom of Disposed
+  Lô đã được xử lý xuất hủy.
+  Không được tiếp tục sử dụng.
+end note
+
+@enduml
