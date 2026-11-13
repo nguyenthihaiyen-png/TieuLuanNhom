@@ -1,4 +1,4 @@
-![Sơ đồ](XulyDonHang.jpg)
+![Sơ đồ](XuLyDonHang.jpg)
 ```plantuml
 @startuml
 
