@@ -116,4 +116,4 @@ endif
 
 stop
 @enduml
-https://github.com/nguyenthihaiyen-png/TieuLuanNhom/blob/0f84741934a26d4c6671dd2d9a51a9c177cb2c47/XuLyDonHang.jpg
+![Sơ đồ](XulyDonHang.jpg)
