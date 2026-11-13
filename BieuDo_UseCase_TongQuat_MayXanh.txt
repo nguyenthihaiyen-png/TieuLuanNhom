@@ -1,0 +1,107 @@
+
+@startuml
+title BIỂU ĐỒ USE CASE TỔNG QUÁT\nHỆ THỐNG QUẢN LÝ BÁN HÀNG VÀ ĐƠN HÀNG MÂY XANH
+
+left to right direction
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam ArrowColor #333333
+skinparam ArrowThickness 1
+skinparam actor {
+    BorderColor #333333
+    FontColor #222222
+}
+skinparam usecase {
+    BackgroundColor #DCEBFA
+    BorderColor #527BA8
+    FontColor #222222
+}
+
+'========================
+' TÁC NHÂN BÊN NGOÀI
+'========================
+
+actor "Khách hàng" as KH
+actor "Thu ngân" as TN
+actor "Pha chế" as PC
+actor "Giao hàng" as GH
+actor "Thủ kho" as TK
+actor "Quản lý" as QL
+
+'========================
+' KHUNG HỆ THỐNG
+'========================
+
+rectangle "HỆ THỐNG QUẢN LÝ BÁN HÀNG VÀ ĐƠN HÀNG MÂY XANH" {
+
+    usecase "CN01\nQuản lý danh mục\nvà sản phẩm" as CN01
+
+    usecase "CN02\nQuản lý đơn hàng" as CN02
+
+    usecase "CN03\nQuản lý pha chế" as CN03
+
+    usecase "CN04\nQuản lý giao hàng" as CN04
+
+    usecase "CN05\nQuản lý thanh toán\nvà hóa đơn" as CN05
+
+    usecase "CN06\nQuản lý kho\nnguyên liệu" as CN06
+
+    usecase "CN07\nQuản lý khuyến mãi\nvà điểm tích lũy" as CN07
+
+    usecase "CN08\nQuản lý báo cáo\nvà thống kê" as CN08
+}
+
+'========================
+' ASSOCIATION - KHÁCH HÀNG
+'========================
+
+KH -- CN01
+KH -- CN02
+KH -- CN05
+KH -- CN07
+
+'========================
+' ASSOCIATION - THU NGÂN
+'========================
+
+TN -- CN01
+TN -- CN02
+TN -- CN05
+TN -- CN07
+
+'========================
+' ASSOCIATION - PHA CHẾ
+'========================
+
+PC -- CN03
+
+'========================
+' ASSOCIATION - GIAO HÀNG
+'========================
+
+GH -- CN04
+GH -- CN05
+
+'========================
+' ASSOCIATION - THỦ KHO
+'========================
+
+TK -- CN06
+
+'========================
+' ASSOCIATION - QUẢN LÝ
+'========================
+
+QL -- CN01
+QL -- CN02
+QL -- CN03
+QL -- CN04
+QL -- CN05
+QL -- CN06
+QL -- CN07
+QL -- CN08
+
+@enduml
