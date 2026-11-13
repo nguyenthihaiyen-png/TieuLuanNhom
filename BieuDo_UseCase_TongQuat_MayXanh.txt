@@ -1,107 +1,160 @@
-
 @startuml
-title BIỂU ĐỒ USE CASE TỔNG QUÁT\nHỆ THỐNG QUẢN LÝ BÁN HÀNG VÀ ĐƠN HÀNG MÂY XANH
-
 left to right direction
-
-skinparam backgroundColor white
 skinparam shadowing false
-skinparam packageStyle rectangle
 skinparam linetype ortho
-skinparam ArrowColor #333333
-skinparam ArrowThickness 1
-skinparam actor {
-    BorderColor #333333
-    FontColor #222222
-}
+skinparam nodesep 25
+skinparam ranksep 30
+
 skinparam usecase {
-    BackgroundColor #DCEBFA
-    BorderColor #527BA8
-    FontColor #222222
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+skinparam actor {
+    BackgroundColor White
+    BorderColor Black
 }
 
-'========================
-' TÁC NHÂN BÊN NGOÀI
-'========================
+title USE CASE TỔNG QUÁT HỆ THỐNG MÂY XANH
 
+'================ TÁC NHÂN & KẾ THỪA ================
 actor "Khách hàng" as KH
-actor "Thu ngân" as TN
-actor "Pha chế" as PC
-actor "Giao hàng" as GH
+actor "Nhân viên" as NV
+actor "Nhân viên thu ngân" as TN
+actor "Nhân viên pha chế" as PC
+actor "Nhân viên giao hàng" as GH
 actor "Thủ kho" as TK
-actor "Quản lý" as QL
+actor "Quản lý cửa hàng" as QL
 
-'========================
-' KHUNG HỆ THỐNG
-'========================
+NV <|-- TN
+NV <|-- PC
+NV <|-- GH
+NV <|-- TK
+NV <|-- QL
 
 rectangle "HỆ THỐNG QUẢN LÝ BÁN HÀNG VÀ ĐƠN HÀNG MÂY XANH" {
+    
+    ' --- Hệ thống chung ---
+    usecase "Đăng nhập hệ thống" as UC01
 
-    usecase "CN01\nQuản lý danh mục\nvà sản phẩm" as CN01
+    ' --- Quản lý danh mục ---
+    usecase "Quản lý sản phẩm,\nloại và kích cỡ" as UC02
+    usecase "Quản lý topping" as UC03
+    usecase "Quản lý nguyên liệu\nvà định mức" as UC04
+    usecase "Quản lý khách hàng\nvà nhà cung cấp" as UC05
 
-    usecase "CN02\nQuản lý đơn hàng" as CN02
+    ' --- Quản lý đơn hàng ---
+    usecase "Tạo đơn hàng" as UC06
+    usecase "Cập nhật thông tin\nđơn hàng" as UC07
+    usecase "Xác nhận và theo dõi\ntrạng thái đơn hàng" as UC08
+    usecase "Hủy đơn hàng" as UC09
 
-    usecase "CN03\nQuản lý pha chế" as CN03
+    ' --- Quản lý pha chế ---
+    usecase "Tiếp nhận đơn pha chế" as UC10
+    usecase "Kiểm tra nguyên liệu" as UC11
+    usecase "Cập nhật tiến độ\npha chế" as UC12
 
-    usecase "CN04\nQuản lý giao hàng" as CN04
+    ' --- Quản lý giao hàng ---
+    usecase "Phân công nhân viên\ngiao hàng" as UC13
+    usecase "Theo dõi giao hàng" as UC14
+    usecase "Cập nhật kết quả\ngiao hàng" as UC15
 
-    usecase "CN05\nQuản lý thanh toán\nvà hóa đơn" as CN05
+    ' --- Thanh toán và hóa đơn ---
+    usecase "Ghi nhận thanh toán" as UC16
+    usecase "Xác nhận thanh toán\nchuyển khoản" as UC17
+    usecase "Lập và xem hóa đơn" as UC18
+    usecase "Xử lý hoàn trả" as UC19
 
-    usecase "CN06\nQuản lý kho\nnguyên liệu" as CN06
+    ' --- Quản lý kho ---
+    usecase "Lập phiếu nhập kho" as UC20
+    usecase "Lập phiếu xuất kho" as UC21
+    usecase "Kiểm kê kho" as UC22
+    usecase "Theo dõi tồn kho\nvà hạn sử dụng" as UC23
+    usecase "Cảnh báo tồn kho thấp" as UC24
 
-    usecase "CN07\nQuản lý khuyến mãi\nvà điểm tích lũy" as CN07
+    ' --- Khuyến mãi và điểm tích lũy ---
+    usecase "Quản lý mã giảm giá" as UC25
+    usecase "Áp dụng mã giảm giá" as UC26
+    usecase "Quản lý điểm tích lũy" as UC27
+    usecase "Sử dụng điểm tích lũy" as UC28
 
-    usecase "CN08\nQuản lý báo cáo\nvà thống kê" as CN08
+    ' --- Báo cáo và thống kê ---
+    usecase "Xem báo cáo doanh thu" as UC29
+    usecase "Thống kê sản phẩm bán chạy" as UC30
+    usecase "Thống kê tình hình tồn kho" as UC31
+    usecase "Thống kê đơn hàng bị hủy" as UC32
+
+    ' --- Quản trị nội bộ ---
+    usecase "Quản lý nhân viên" as UC33
+    usecase "Quản lý tài khoản" as UC34
+    usecase "Quản lý vai trò\nvà phân quyền" as UC35
+    usecase "Thay đổi giá bán" as UC36
+    usecase "Xem lịch sử thao tác" as UC37
 }
 
-'========================
-' ASSOCIATION - KHÁCH HÀNG
-'========================
+'================ LIÊN KẾT TÁC NHÂN ================
+KH -- UC06
+NV -- UC01
 
-KH -- CN01
-KH -- CN02
-KH -- CN05
-KH -- CN07
+TN -- UC02
+TN -- UC03
+TN -- UC05
+TN -- UC06
+TN -- UC07
+TN -- UC08
+TN -- UC09
+TN -- UC16
+TN -- UC18
+TN -- UC26
+TN -- UC28
 
-'========================
-' ASSOCIATION - THU NGÂN
-'========================
+PC -- UC10
+PC -- UC11
+PC -- UC12
 
-TN -- CN01
-TN -- CN02
-TN -- CN05
-TN -- CN07
+GH -- UC14
+GH -- UC15
 
-'========================
-' ASSOCIATION - PHA CHẾ
-'========================
+TK -- UC04
+TK -- UC20
+TK -- UC21
+TK -- UC22
+TK -- UC23
 
-PC -- CN03
+QL -- UC02
+QL -- UC03
+QL -- UC04
+QL -- UC05
+QL -- UC08
+QL -- UC09
+QL -- UC13
+QL -- UC17
+QL -- UC19
+QL -- UC20
+QL -- UC21
+QL -- UC22
+QL -- UC23
+QL -- UC24
+QL -- UC25
+QL -- UC27
+QL -- UC29
+QL -- UC30
+QL -- UC31
+QL -- UC32
+QL -- UC33
+QL -- UC34
+QL -- UC35
+QL -- UC36
+QL -- UC37
 
-'========================
-' ASSOCIATION - GIAO HÀNG
-'========================
+'================ INCLUDE / EXTEND ================
+UC06 ..> UC16 : <<include>>
+UC06 ..> UC26 : <<extend>>
+UC06 ..> UC28 : <<extend>>
 
-GH -- CN04
-GH -- CN05
+UC10 ..> UC11 : <<include>>
 
-'========================
-' ASSOCIATION - THỦ KHO
-'========================
-
-TK -- CN06
-
-'========================
-' ASSOCIATION - QUẢN LÝ
-'========================
-
-QL -- CN01
-QL -- CN02
-QL -- CN03
-QL -- CN04
-QL -- CN05
-QL -- CN06
-QL -- CN07
-QL -- CN08
+UC20 ..> UC24 : <<extend>>
+UC21 ..> UC24 : <<extend>>
 
 @enduml
