@@ -1,0 +1,158 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 25
+skinparam ranksep 30
+
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+skinparam actor {
+    BackgroundColor White
+    BorderColor Black
+}
+
+title USE CASE TỔNG QUÁT HỆ THỐNG MÂY XANH
+
+'================ TÁC NHÂN & KẾ THỪA ================
+actor "Khách hàng" as KH
+actor "Nhân viên" as NV
+actor "Nhân viên thu ngân" as TN
+actor "Nhân viên pha chế" as PC
+actor "Nhân viên giao hàng" as GH
+actor "Thủ kho" as TK
+actor "Quản lý cửa hàng" as QL
+
+NV <|-- TN
+NV <|-- PC
+NV <|-- GH
+NV <|-- TK
+NV <|-- QL
+
+rectangle "HỆ THỐNG QUẢN LÝ BÁN HÀNG VÀ ĐƠN HÀNG MÂY XANH" {
+    
+    ' --- Hệ thống chung ---
+    usecase "Đăng nhập hệ thống" as UC01
+
+    ' --- Quản lý danh mục ---
+    usecase "Quản lý sản phẩm" as UC02
+    usecase "Quản lý loại sản phẩm" as UC03
+    usecase "Quản lý topping" as UC04
+    usecase "Quản lý nguyên liệu" as UC05
+    usecase "Quản lý công thức nguyên liệu" as UC06
+    usecase "Quản lý khách hàng" as UC07
+    usecase "Quản lý nhà cung cấp" as UC08
+
+    ' --- Quản lý đơn hàng ---
+    usecase "Tạo đơn hàng" as UC09
+    usecase "Cập nhật đơn hàng" as UC10
+    usecase "Xác nhận đơn hàng" as UC11
+    usecase "Hủy đơn hàng" as UC12
+    usecase "Tra cứu đơn hàng" as UC13
+    usecase "Theo dõi trạng thái đơn hàng" as UC14
+
+    ' --- Quản lý pha chế ---
+    usecase "Tiếp nhận pha chế" as UC15
+    usecase "Kiểm tra nguyên liệu" as UC16
+    usecase "Cập nhật trạng thái pha chế" as UC17
+
+    ' --- Quản lý giao hàng ---
+    usecase "Phân công giao hàng" as UC18
+    usecase "Cập nhật giao hàng" as UC19
+
+    ' --- Thanh toán và hóa đơn ---
+    usecase "Ghi nhận thanh toán" as UC20
+    usecase "Xác nhận chuyển khoản" as UC21
+    usecase "Lập hóa đơn" as UC22
+    usecase "Xử lý hoàn tiền" as UC23
+
+    ' --- Khuyến mãi và điểm tích lũy ---
+    usecase "Quản lý mã giảm giá" as UC24
+    usecase "Áp dụng mã giảm giá" as UC25
+    usecase "Tích lũy điểm" as UC26
+    usecase "Sử dụng điểm" as UC27
+
+    ' --- Quản lý kho ---
+    usecase "Lập phiếu nhập kho" as UC28
+    usecase "Lập phiếu xuất kho" as UC29
+    usecase "Quản lý lô nguyên liệu" as UC30
+    usecase "Kiểm kê kho" as UC31
+    usecase "Cảnh báo tồn kho" as UC32
+
+    ' --- Báo cáo và thống kê ---
+    usecase "Xem báo cáo doanh thu" as UC33
+    usecase "Thống kê đơn hàng" as UC34
+    usecase "Thống kê sản phẩm bán chạy" as UC35
+    usecase "Xem báo cáo tồn kho" as UC36
+    usecase "Xem lịch sử thao tác" as UC37
+}
+
+'================ LIÊN KẾT TÁC NHÂN ================
+KH -- UC09
+NV -- UC01
+
+TN -- UC07
+TN -- UC09
+TN -- UC10
+TN -- UC11
+TN -- UC12
+TN -- UC13
+TN -- UC14
+TN -- UC20
+TN -- UC21
+TN -- UC22
+TN -- UC23
+TN -- UC25
+TN -- UC27
+
+PC -- UC15
+PC -- UC16
+PC -- UC17
+
+GH -- UC18
+GH -- UC19
+
+TK -- UC05
+TK -- UC08
+TK -- UC28
+TK -- UC29
+TK -- UC30
+TK -- UC31
+TK -- UC36
+
+QL -- UC02
+QL -- UC03
+QL -- UC04
+QL -- UC05
+QL -- UC06
+QL -- UC07
+QL -- UC08
+QL -- UC10
+QL -- UC12
+QL -- UC13
+QL -- UC14
+QL -- UC18
+QL -- UC21
+QL -- UC23
+QL -- UC24
+QL -- UC28
+QL -- UC29
+QL -- UC33
+QL -- UC34
+QL -- UC35
+QL -- UC36
+QL -- UC37
+
+'================ INCLUDE / EXTEND ================
+UC09 ..> UC20 : <<include>>
+UC09 ..> UC25 : <<extend>>
+UC09 ..> UC27 : <<extend>>
+
+UC15 ..> UC16 : <<include>>
+
+UC28 ..> UC32 : <<extend>>
+UC29 ..> UC32 : <<extend>>
+@enduml
