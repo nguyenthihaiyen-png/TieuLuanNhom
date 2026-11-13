@@ -115,4 +115,4 @@ endif
 
 stop
 @enduml
-![Sơ đồ](XulyDonHang.jpg)
+![Sơ đồ](XuLyDonHang.jpg)
