@@ -1,0 +1,346 @@
+@startuml
+
+title CLASS DIAGRAM - HỆ THỐNG QUẢN LÝ MÂY XANH
+
+left to right direction
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype polyline
+skinparam packageStyle rectangle
+
+'================ NHÓM NGƯỜI DÙNG ================
+
+package "Quản lý người dùng" {
+
+    abstract class Nguoi {
+        - hoTen: String
+        - soDienThoai: String
+        - diaChi: String
+        + capNhatThongTin(): void
+        + hienThiThongTin(): void
+    }
+
+    class NhanVien {
+        - maNhanVien: int
+        - chucVu: String
+        - trangThai: String
+        + capNhatNhanVien(): void
+        + doiTrangThai(): void
+    }
+
+    class KhachHang {
+        - maKhachHang: int
+        - diemTichLuy: int
+        + capNhatKhachHang(): void
+        + congDiem(): void
+        + truDiem(): void
+    }
+
+    class TaiKhoan {
+        - maTaiKhoan: int
+        - tenDangNhap: String
+        - matKhau: String
+        - trangThai: String
+        + dangNhap(): bool
+        + dangXuat(): void
+        + doiMatKhau(): void
+    }
+
+    class VaiTro {
+        - maVaiTro: int
+        - tenVaiTro: String
+        + kiemTraQuyen(): bool
+        + capNhatVaiTro(): void
+    }
+
+    class ChiNhanh {
+        - maChiNhanh: int
+        - tenChiNhanh: String
+        - diaChi: String
+        - soDienThoai: String
+        + capNhatChiNhanh(): void
+    }
+}
+
+Nguoi <|-- NhanVien
+Nguoi <|-- KhachHang
+
+NhanVien "1" -- "0..1" TaiKhoan : sử dụng
+VaiTro "1" -- "0..*" TaiKhoan : phân quyền
+ChiNhanh "1" -- "0..*" NhanVien : quản lý
+
+'================ NHÓM DANH MỤC ================
+
+package "Quản lý danh mục" {
+
+    class DanhMuc {
+        - maDanhMuc: int
+        - tenDanhMuc: String
+        + themDanhMuc(): void
+        + capNhatDanhMuc(): void
+    }
+
+    class SanPham {
+        - maSP: int
+        - tenSP: String
+        - moTa: String
+        - trangThai: String
+        + themSanPham(): void
+        + capNhatSanPham(): void
+        + ngungKinhDoanh(): void
+    }
+
+    class KichCo {
+        - maKichCo: int
+        - tenKichCo: String
+        + capNhatKichCo(): void
+    }
+
+    class SanPhamKichCo {
+        - maSPKC: int
+        - giaBan: decimal
+        - trangThai: String
+        + capNhatGiaBan(): void
+        + kiemTraKinhDoanh(): bool
+    }
+
+    class Topping {
+        - maTopping: int
+        - tenTopping: String
+        - giaBan: decimal
+        - trangThai: String
+        + capNhatTopping(): void
+    }
+
+    class NguyenLieu {
+        - maNguyenLieu: int
+        - tenNguyenLieu: String
+        - donViTinh: String
+        - tonToiThieu: decimal
+        + capNhatNguyenLieu(): void
+        + kiemTraTonKho(): bool
+    }
+
+    class DinhMuc {
+        - maDinhMuc: int
+        - soLuong: decimal
+        + capNhatDinhMuc(): void
+        + tinhLuongNguyenLieu(): decimal
+    }
+
+    class NhaCungCap {
+        - maNhaCungCap: int
+        - tenNhaCungCap: String
+        - soDienThoai: String
+        - diaChi: String
+        + capNhatNhaCungCap(): void
+    }
+}
+
+DanhMuc "1" -- "0..*" SanPham
+SanPham "1" -- "0..*" SanPhamKichCo
+KichCo "1" -- "0..*" SanPhamKichCo
+SanPhamKichCo "1" -- "0..*" DinhMuc
+NguyenLieu "1" -- "0..*" DinhMuc
+
+'================ NHÓM ĐƠN HÀNG ================
+
+package "Quản lý đơn hàng" {
+
+    class DonHang {
+        - maDonHang: int
+        - maDon: String
+        - ngayDat: DateTime
+        - kenhDat: String
+        - loaiDon: String
+        - trangThai: String
+        - tongTien: decimal
+        - tienGiam: decimal
+        - phiGiaoHang: decimal
+        + taoDonHang(): void
+        + capNhatDonHang(): void
+        + xacNhanDonHang(): void
+        + huyDonHang(): void
+        + capNhatTrangThai(): void
+    }
+
+    class ChiTietDonHang {
+        - maChiTiet: int
+        - soLuong: int
+        - donGia: decimal
+        - ghiChu: String
+        + tinhThanhTien(): decimal
+        + capNhatSoLuong(): void
+    }
+
+    class ChiTietTopping {
+        - soLuong: int
+        - donGia: decimal
+        + tinhTienTopping(): decimal
+    }
+
+    class LichSuDonHang {
+        - maLichSu: int
+        - trangThaiCu: String
+        - trangThaiMoi: String
+        - ngayCapNhat: DateTime
+        - ghiChu: String
+        + ghiNhanThayDoi(): void
+    }
+}
+
+KhachHang "0..1" -- "0..*" DonHang : đặt
+NhanVien "1" -- "0..*" DonHang : tiếp nhận
+ChiNhanh "1" -- "0..*" DonHang : phát sinh
+
+DonHang "1" *-- "1..*" ChiTietDonHang : gồm
+SanPhamKichCo "1" -- "0..*" ChiTietDonHang : được chọn
+ChiTietDonHang "1" *-- "0..*" ChiTietTopping : gồm
+Topping "1" -- "0..*" ChiTietTopping : được chọn
+
+DonHang "1" -- "0..*" LichSuDonHang : ghi nhận
+
+'================ NHÓM THANH TOÁN - KHUYẾN MÃI ================
+
+package "Thanh toán và khuyến mãi" {
+
+    class ThanhToan {
+        - maThanhToan: int
+        - phuongThuc: String
+        - soTien: decimal
+        - ngayThanhToan: DateTime
+        - trangThai: String
+        + ghiNhanThanhToan(): void
+        + xacNhanThanhToan(): bool
+    }
+
+    class HoaDon {
+        - maHoaDon: int
+        - ngayLap: DateTime
+        - tongTien: decimal
+        + lapHoaDon(): void
+        + inHoaDon(): void
+    }
+
+    class MaGiamGia {
+        - maCoupon: int
+        - maCode: String
+        - loaiGiam: String
+        - giaTriGiam: decimal
+        - ngayBatDau: Date
+        - ngayKetThuc: Date
+        + kiemTraHieuLuc(): bool
+        + tinhTienGiam(): decimal
+    }
+
+    class ApDungCoupon {
+        - maApDung: int
+        - tienGiam: decimal
+        + apDungCoupon(): void
+    }
+
+    class LichSuDiem {
+        - maLichSuDiem: int
+        - soDiem: int
+        - loaiGiaoDich: String
+        - ngayGiaoDich: DateTime
+        + ghiNhanDiem(): void
+    }
+}
+
+DonHang "1" -- "0..*" ThanhToan
+DonHang "1" -- "0..1" HoaDon
+DonHang "1" -- "0..1" ApDungCoupon
+MaGiamGia "1" -- "0..*" ApDungCoupon
+KhachHang "1" -- "0..*" LichSuDiem
+DonHang "0..1" -- "0..*" LichSuDiem
+
+'================ NHÓM KHO ================
+
+package "Quản lý kho" {
+
+    class LoNguyenLieu {
+        - maLo: int
+        - soLuongNhap: decimal
+        - soLuongCon: decimal
+        - ngayNhap: Date
+        - hanSuDung: Date
+        - trangThai: String
+        + kiemTraHanSuDung(): bool
+        + capNhatSoLuong(): void
+    }
+
+    class PhieuNhap {
+        - maPhieuNhap: int
+        - ngayNhap: DateTime
+        - tongTien: decimal
+        + taoPhieuNhap(): void
+        + xacNhanNhap(): void
+    }
+
+    class PhieuXuat {
+        - maPhieuXuat: int
+        - ngayXuat: DateTime
+        - lyDoXuat: String
+        + taoPhieuXuat(): void
+        + xacNhanXuat(): void
+    }
+
+    class KiemKe {
+        - maKiemKe: int
+        - ngayKiemKe: DateTime
+        - ghiChu: String
+        + taoPhieuKiemKe(): void
+        + doiChieuTonKho(): void
+    }
+
+    class LichSuKho {
+        - maLichSuKho: int
+        - loaiGiaoDich: String
+        - soLuong: decimal
+        - ngayGiaoDich: DateTime
+        + ghiNhanBienDongKho(): void
+    }
+}
+
+NhaCungCap "1" -- "0..*" PhieuNhap
+NhanVien "1" -- "0..*" PhieuNhap : lập
+PhieuNhap "1" -- "1..*" LoNguyenLieu : tạo lô
+NguyenLieu "1" -- "0..*" LoNguyenLieu : thuộc loại
+
+NhanVien "1" -- "0..*" PhieuXuat : lập
+NguyenLieu "1" -- "0..*" PhieuXuat : xuất
+NhanVien "1" -- "0..*" KiemKe : thực hiện
+NguyenLieu "1" -- "0..*" KiemKe : kiểm kê
+NguyenLieu "1" -- "0..*" LichSuKho : biến động
+
+'================ NHÓM PHA CHẾ - GIAO HÀNG ================
+
+package "Pha chế và giao hàng" {
+
+    class LichSuCheBien {
+        - maLichSuCheBien: int
+        - thoiGianBatDau: DateTime
+        - thoiGianHoanTat: DateTime
+        - trangThai: String
+        + capNhatTienDo(): void
+        + ghiNhanHoanTat(): void
+    }
+
+    class GiaoHang {
+        - maGiaoHang: int
+        - ngayPhanCong: DateTime
+        - ngayGiao: DateTime
+        - trangThaiGiao: String
+        + phanCongNhanVien(): void
+        + capNhatKetQuaGiao(): void
+    }
+}
+
+DonHang "1" -- "0..*" LichSuCheBien
+NhanVien "1" -- "0..*" LichSuCheBien : thực hiện
+
+DonHang "1" -- "0..1" GiaoHang
+NhanVien "0..1" -- "0..*" GiaoHang : nhân viên giao
+
+@enduml
